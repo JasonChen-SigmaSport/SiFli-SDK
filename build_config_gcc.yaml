@@ -87,14 +87,14 @@ common_projects:
   - path: example/ble/ams/project/common
     boards: *default_boards
 
-  - path: example/ble/central_and_peripheral/project/common
+  - path: example/ble/central_and_peripheral/project/hcpu
     boards: *default_boards
 
   - path: example/ble/hid/project/common
     boards: *default_boards
 
-  - path: example/ble/multi_connection/project/common
-    boards: *default_boards
+  # - path: example/ble/multi_connection/project/common
+  #   boards: *default_boards
 
   - path: example\ble\periodic_adv\project
     boards: *default_boards
@@ -115,6 +115,10 @@ common_projects:
 
   - path: example/ble/throughput/project
     boards: *default_boards
+
+  - path: example/bt/HCI_over_uart/project
+    boards: 
+      - em-lb525_hcpu    
 
   - path: example/bt/hfp/project
     boards: *bt_boards
@@ -190,8 +194,8 @@ common_projects:
   - path: example/get-started/blink/no-os/project
     boards: *default_boards
 
-  - path: example/storage/file_system/project
-    boards: *default_boards
+  # - path: example/storage/file_system/project
+  #   boards: *default_boards
 
   - path: example/get-started/hello_world/no-os/project
     boards: *default_boards
@@ -305,10 +309,14 @@ common_projects:
   # - path: example/rt_device/pdm/project
   #   boards: *525_devkit_lcd_boards
 
-  - path: example/rt_device/pwm/pwm/project
-    boards: *525_devkit_lcd_boards
+  - path: example/rt_device/pm/project/hcpu
+    boards:
+      - em-lb566
+      - eh-lb551
+      - em-lb525
+      - em-lb587
 
-  - path: example/rt_device/pwm/pwm_dma/project
+  - path: example/rt_device/pwm/project
     boards: *525_devkit_lcd_boards
 
   - path: example/rt_device/rgb_led/project
@@ -331,4 +339,13 @@ common_projects:
 
   - path: example/rt_device/wdt/project
     boards: *525_devkit_lcd_boards    
+
+  - path: example/storage/flashdb/project/nand
+    boards:
+      - eh-lb525
+
+  - path: example/storage/flashdb/project/nor
+    boards:
+      - eh-lb523
+      - em-lb525 
 
