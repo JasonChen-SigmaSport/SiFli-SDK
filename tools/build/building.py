@@ -172,7 +172,8 @@ def ImgFileBuilder(target, source, env):
     filename = os.path.basename("{}".format(target[0]))
     tgt_directory = os.path.dirname("{}".format(target[0]))
     logging.info('ImgFileBuilder= '+env['FLAGS'])
-    if ".gif" in str(source[0]):
+    # if ".gif" in str(source[0]):
+    if 0: # Merge cases (.gif and .png)
         subprocess.run(EZIP_PATH+' -gif '+str(source[0])+ ' ' + env['FLAGS'], shell=True, check=True)
         logging.info("gif")
         target_filename = os.path.basename("{}".format(target[0]))
