@@ -435,21 +435,24 @@ static bt_cm_err_t bt_cm_profile_connect(uint32_t profile_bit, bt_cm_conned_dev_
                     RT_ASSERT(0);
                 avrcp_conn_req(bts2_task_get_app_task_id(), conn->info.bd_addr, rmt_role, role);
             }
-// #ifdef CFG_HID
-//     else if (profile_bit == BT_CM_HID)
-//     {
-//         hid_conn_req(bts2_task_get_app_task_id(), conn->info.bd_addr, HID_Host, HID_Device);
-//     }
-// #endif
             else
 #endif
 #ifdef CFG_PAN
                 if (profile_bit == BT_CM_PAN)
                 {
 #ifdef BT_FINSH_PAN
-                    err = bt_pan_conn(&(conn->info.bd_addr));
+                    extern int bt_pan_conn_by_addr(BTS2S_BD_ADDR * remote_addr);
+                    err = bt_pan_conn_by_addr(&(conn->info.bd_addr));
 #endif
                 }
+
+#ifdef CFG_HID
+    else if (profile_bit == BT_CM_HID)
+    {
+        hid_conn_req(bts2_task_get_app_task_id(), conn->info.bd_addr, HID_Host, HID_Device);
+    }
+#endif
+
                 else
 #endif
 
@@ -1305,13 +1308,20 @@ int bt_cm_gap_event_handler(uint16_t event_id, uint8_t *msg)
         // bt_cm_conned_dev_t *conn = bt_cm_find_conn_by_addr(env, &ind->bd);
 
         LOG_I("BTS2MU_GAP_ENCRYPTION_IND");
-
-        //conn->rmt_smc = 1;
-
         uint8_t addr[6];
         bt_addr_convert(&ind->bd, addr);
         bt_interface_bt_event_notify(BT_NOTIFY_COMMON, BT_NOTIFY_COMMON_ENCRYPTION, addr, 6);
+        break;
+    }
+    case BTS2MU_GAP_KEYMISSING_IND:
+    {
+        BTS2S_GAP_KEYMISSING_IND *ind;
 
+        ind = (BTS2S_GAP_KEYMISSING_IND *)msg;
+        U8     addr[6];
+        bt_addr_convert(&ind->bd, addr);
+        bt_cm_delete_bonded_devs_and_linkkey(addr);
+        // bt_interface_bt_event_notify(BT_NOTIFY_COMMON, BT_NOTIFY_COMMON_ENCRYPTION, addr, 6);
         break;
     }
     default:
@@ -1425,15 +1435,15 @@ int bt_cm_hci_event_handler(uint16_t event_id, uint8_t *msg)
                 hcia_wr_lp_settings_keep_sniff_interval(&ind->bd, HCI_LINK_POLICY_NO_CHANGE, BT_CM_SNIFF_ENTER_TIME, BT_CM_SNIFF_INV, BT_CM_SNIFF_INV, BT_CM_SNIFF_ATTEMPT, BT_CM_SNIFF_TIMEOUT, NULL);
 
                 bt_cm_add_bonded_dev(&conn->info, 1);
-// #ifdef BT_AUTO_CONNECT_LAST_DEVICE
-//                 if (ind->incoming)
-//                 {
-//                     conn->tim_hdl = rt_timer_create("btcm_con", bt_cm_conn_timeout, conn,
-//                                                     rt_tick_from_millisecond(BT_CM_MAX_TIMEOUT), RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
+#ifdef BT_AUTO_CONNECT_LAST_DEVICE
+                // if (ind->incoming)
+                // {
+                //     conn->tim_hdl = rt_timer_create("btcm_con", bt_cm_conn_timeout, conn,
+                //                                     rt_tick_from_millisecond(BT_CM_MAX_TIMEOUT), RT_TIMER_FLAG_ONE_SHOT | RT_TIMER_FLAG_SOFT_TIMER);
 
-//                     rt_timer_start(conn->tim_hdl);   //start the timer,when gap receive BTS2MU_GAP_RMT_SMC_IND
-//                 }
-// #endif
+                //     rt_timer_start(conn->tim_hdl);   //start the timer,when gap receive BTS2MU_GAP_RMT_SMC_IND
+                // }
+#endif
             }
         }
         else
@@ -1666,6 +1676,7 @@ bt_cm_err_t bt_cm_connect_req(BTS2S_BD_ADDR *bd_addr, bt_cm_conn_role_t role)
             {
                 err = BT_CM_ERR_INVALID_PARA;
                 bt_cm_conn_destory(env, conn);
+                gap_wr_scan_enb_req(bts2_task_get_app_task_id(), 1, 1);
                 break;
             }
 
@@ -1674,6 +1685,7 @@ bt_cm_err_t bt_cm_connect_req(BTS2S_BD_ADDR *bd_addr, bt_cm_conn_role_t role)
         }
         else
         {
+            gap_wr_scan_enb_req(bts2_task_get_app_task_id(), 1, 1);
             bt_cm_conn_destory(env, conn);
         }
         err = BT_CM_ERR_NO_ERR;
@@ -1910,13 +1922,6 @@ void bt_cm(uint8_t argc, char **argv)
         else if (strcmp(argv[1], "release_a2dp") == 0)
         {
             bt_av_release_stream(0);
-        }
-#endif
-#ifdef CFG_SPP_LOOPBACK
-        else if (strcmp(argv[1], "spp_loopback") == 0)
-        {
-            LOG_I("set loopback: %d", atoi(argv[2]));
-            bt_spp_set_spp_data_loopback_enable(atoi(argv[2]));
         }
 #endif
     }

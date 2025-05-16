@@ -669,7 +669,6 @@ void bt_wr_link_policy(BTS2S_BD_ADDR *bd, uint16_t link_policy_mode)
     //                    NULL,
     //                    NULL);
     hcia_wr_lp_settings(bd, link_policy_mode, NULL);
-
 }
 
 void bt_etner_sniff_mode(BTS2S_BD_ADDR *bd, uint16_t interval, uint16_t attmpt)
