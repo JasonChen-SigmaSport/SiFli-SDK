@@ -254,6 +254,12 @@ SECTIONS
     __rt_init_end = .;
 
     . = ALIGN(4);
+    PROVIDE(__ctors_start__ = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array))
+    PROVIDE(__ctors_end__ = .);
+
+    . = ALIGN(4);
     BuiltinAppTab_start = .;
     KEEP(*(BuiltinAppTab))
     BuiltinAppTab_end = .;
@@ -411,13 +417,14 @@ SECTIONS
 
     . = ALIGN(4);
     /* init data */
+    /*
     _sinit = ABSOLUTE(.);
     PROVIDE_HIDDEN (__init_array_start = .);
     KEEP(*(SORT(.init_array.*)))
     KEEP(*(.init_array))
     _einit = ABSOLUTE(.);
     PROVIDE_HIDDEN (__init_array_end = .);
-
+    */
 
     . = ALIGN(4);
     /* finit data */
