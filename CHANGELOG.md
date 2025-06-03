@@ -10,24 +10,60 @@
 ## Change log since v2.3
 ### Bluetooth
 #### Fixed
-- Fix sf32lb58 BT sniff disconnect issue
-- Reset 56x bt lcpu audio buffer for cvsd current sound
-- Fixed some controller bugs
-- Fixed BLE write packet wrong order issue
-- BT: Increase stack ready wait time from 5s to 8s
-- Fixed connection fail with some phones on sf32lb52 
+- bt: Fix sf32lb58 BT sniff disconnect issue
+- common: Reset 56x bt lcpu audio buffer for cvsd current sound
+- common: Fixed some controller bugs
+- ble: Fixed BLE write packet wrong order issue
+- common: Increase stack ready wait time from 5s to 8s
+- bt: Fixed connection fail with some phones on sf32lb52
+- bt: Fixed l2cap connection failed with some Qualcomm peripherial devices
+- common: Fixed a memory leak of rfcomm
+- ble: Fixed gatt search failed if remote device has duplicate gatt characteristic
+- ble: Fixed gatt search descriptor failed if remote device has more than 2 descriptor
+- ble: Fixed Periodic advertising carried wrongly TX power.
+- bt: Fixed volume can not set for some earphones
+- ble: Fixed update connection parameter failed in sf32lb55x
+- ble: Fixed advertise length check error in the customize mode of advertising service
+- bt: Fixed the time of connecting to oppo R15 is too long
+- ble: Fixed sync state is not clear after active stopped periodic adv scan
+
+
 
 #### Changed
-- Optimize 3sco
-- Disable sf32lb58 BTC warning assert
-- Update RF driver for sf32lb58 and sf32lb52
-- Fix userbin nonsignaling test power issue
+- bt: Optimize 3sco
+- common: Disable sf32lb58 BTC warning assert
+- rf: Update RF driver for sf32lb58 and sf32lb52
+- test: Fix userbin nonsignaling test power issue
 - rf: Fix 6dBm power issue
+- bt: Optimize events of L2CAP customized profile and HF AG profile
+- ble: Optimize comments for event of periodic sync stop
+- bt: Optimize bt pan flow to avoid some potential problems
+- ble: Do not resume periodic sync in the resume process of BLE pairing.
+- bt: Do not switch role if connected more than 2 peripherial devices.
+- bt: Optimize the structure of address in SPP APIs
+- bt: Remove reconnection timer in bt connection manager
+- common: Optimize configure of sf32lb58 lcpu
+
+
 
 
 #### Added
-- Add 587 PTA for coexistence with WIFI
-- Add BT RF CW test interface for sf32lb56x and sf32lb58x
+- common: Add 587 PTA for coexistence with WIFI
+- rf: Add BT RF CW test interface for sf32lb56x and sf32lb58x
+- common: Add new event to notify extended features of remote device
+- bt: Add SPP loop-back function
+- bt: Add new API to set link policy
+- bt: Add BT HID example
+- ble: Add new API ble_gap_scan_start_ex() to set active/passive property
+- bt: Add new APIs in bt connection mananger to passkey entry pair
+- bt: Support AAC decode in A2DP
+- bt: Add new APIs to config BT io capability and response to user confirm
+- bt: SPP support multi channels and links
+
+
+
+
+
 
 ### Drivers
 #### Fixed
