@@ -272,7 +272,7 @@ common_projects:
       - sf32lb56-lcd_a128r12n1
       - sf32lb56-lcd_n16r12n1
       - sf32lb58-lcd_n16r64n4
-      - pc
+      # - pc
 
   - path: example/multimedia/lvgl/lvgl_v9_demos/project
     boards: 
