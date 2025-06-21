@@ -97,7 +97,7 @@ typedef struct
     FACTORY_CFG_VBK_LDO_T data;
 } PMU_CalDataTypeDef;
 
-static PMU_CalDataTypeDef pmu_cal_data;
+HAL_RETM_BSS_SECT(pmu_cal_data, static PMU_CalDataTypeDef pmu_cal_data);
 #endif /* (SF32LB52X || SF32LB56X) && SOC_BF0_HCPU*/
 
 #ifdef PMUC_CR_PIN0_SEL
