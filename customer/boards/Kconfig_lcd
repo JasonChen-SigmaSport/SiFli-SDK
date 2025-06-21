@@ -516,7 +516,7 @@ if BSP_USING_TOUCHD
     menu "Touch config"
         config BSP_TOUCH_IRQ_FROM_DATASVC
             bool "Touch IRQ using data service in LCPU"
-            default y
+            default n
             depends on BSP_USING_DATA_SVC && SOC_SF32LB55X
 
         config TOUCH_DEVICE_NAME
