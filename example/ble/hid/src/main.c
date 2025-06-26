@@ -678,6 +678,15 @@ static void ble_app_advertising_start(void)
         memcpy(para.adv_data.completed_uuid->uuid_list[0].uuid.uuid_16, &uuid_hids, para.adv_data.completed_uuid->uuid_list[0].uuid_len);
     }
 
+    /* Prepare appearance filed .*/
+    para.adv_data.appearance = rt_malloc(2);
+    // Mouse (HID subtype)
+    uint16_t appearance = 962;
+    memcpy(para.adv_data.appearance, &appearance, 2);
+
+    // set ad type flag
+    para.adv_data.disc_mode = GAPM_ADV_MODE_GEN_DISC;
+
     /* Prepare manufacturer filed .*/
     para.adv_data.manufacturer_data = rt_malloc(sizeof(sibles_adv_type_manufacturer_data_t) + sizeof(manu_additnal_data));
     para.adv_data.manufacturer_data->company_id = manu_company_id;
@@ -692,6 +701,7 @@ static void ble_app_advertising_start(void)
         sibles_advertising_start(g_app_advertising_context);
     }
 
+    rt_free(para.rsp_data.appearance);
     rt_free(para.rsp_data.completed_name);
     rt_free(para.adv_data.manufacturer_data);
 }
