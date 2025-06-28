@@ -89,6 +89,9 @@
 #include "lwip/apps/websocket_client.h"
 #include "lws-sha1-base64.h"
 
+#undef  printf
+#define printf rt_kprintf
+
 #ifndef LWIP_ALTCP
     #error "NEED LWIP_ALTCP"
 #endif
@@ -235,7 +238,7 @@ wsock_connect(wsock_state_t *pws,    uint16_t len, const char *srvname, const ch
     err_t   err;
     char *buf;
 
-    if (pws==NULL || pws->pcb==NULL || pws->state0!=PWS_STATE_INITD || pws->state1!=PWS_STATE_INITD)
+    if (pws == NULL || pws->pcb == NULL || pws->state0 != PWS_STATE_INITD || pws->state1 != PWS_STATE_INITD)
     {
         printf("wsock_connect: invalid state\n");
         return ERR_VAL;
@@ -321,7 +324,7 @@ wsock_tcp_connected(void *arg, struct altcp_pcb *pcb, err_t err)
     if (wsverbose)
     {
         printf("altcp_write:%d\r\n", pws->request->len - 1);
-        rt_kputs(pws->request->payload);
+        rt_kprintf("%s\n", pws->request->payload);
     }
     // send the websocket handshake; last char is zero termination
     txerr = altcp_write(pws->pcb,
@@ -556,7 +559,8 @@ err_t wsock_close(wsock_state_t *pws, wsock_result_t result, err_t err)
 
         pws->pcb = NULL;
     }
-    if (pws->pconf) {
+    if (pws->pconf)
+    {
         altcp_tls_free_config(pws->pconf);
         pws->pconf = NULL;
     }
@@ -761,7 +765,8 @@ wsock_controlmsg(wsock_state_t *pws, char *pktbuf)
 static uint32_t wsock_pkt_len(char *pkt)
 {
     uint32_t len = (u16_t)(pkt[1] & WSHDRBITS_PAYLOAD_LEN);
-    if (len == WSHDRBITS_PAYLOAD_LEN_EXT16) {
+    if (len == WSHDRBITS_PAYLOAD_LEN_EXT16)
+    {
         len = ntohs(*((uint16_t *) &pkt[2]));
         len += 4;
     }
@@ -892,7 +897,7 @@ wsock_tcp_recv(void *arg, struct altcp_pcb *pcb, struct pbuf *pb, err_t err)
     // Handle received data.
     if (pws->parse_state == WSOCK_PARSE_RX_DATA && (pb->tot_len > 0))
     {
-        int delta=0;
+        int delta = 0;
         pws->rx_data_bytes += pb->tot_len;
         // received valid data; reset the timeout
         pws->timeout_ticks = WSOCK_POLL_TIMEOUT;
@@ -901,7 +906,7 @@ wsock_tcp_recv(void *arg, struct altcp_pcb *pcb, struct pbuf *pb, err_t err)
         {
             printf("\npbuf coming=%d:\n", pb->tot_len);
             struct pbuf *p = pb;
-            while(p)
+            while (p)
             {
                 printf("\r\n---frag len=%d\r\n", p->len);
                 wsock_hexdump(pb->payload, p->len);
@@ -977,7 +982,7 @@ wsock_tcp_recv(void *arg, struct altcp_pcb *pcb, struct pbuf *pb, err_t err)
             {
                 // Hand off the message to the application layer.
                 if (pws->message_handler)
-                    wsock_invoke_app(pws, (char*)pws->cache);
+                    wsock_invoke_app(pws, (char *)pws->cache);
                 else
                     printf("NO MESSAGE HANDLER FOR RECEIVED MESSAGE!!\n");
             }
@@ -1135,9 +1140,9 @@ wsock_write(wsock_state_t *pws, const char *buf, u16_t buflen, uint8_t opcode)
     if (wsverbose) FNTRACE();
 
     if (pws == NULL
-         || pws->pcb == NULL
-         || pws->state0 != PWS_STATE_INITD
-         || pws->state1 != PWS_STATE_INITD)
+            || pws->pcb == NULL
+            || pws->state0 != PWS_STATE_INITD
+            || pws->state1 != PWS_STATE_INITD)
     {
         printf("wsock_write() passed invalid wsock_state_t struct\n");
         return ERR_CONN;
@@ -1148,7 +1153,8 @@ wsock_write(wsock_state_t *pws, const char *buf, u16_t buflen, uint8_t opcode)
     size_t  hdrlen = WSHDRLEN_MIN, pktlen = 0;
 
     LOCK_TCPIP_CORE();
-    if ((buflen > 0) && !buf) {
+    if ((buflen > 0) && !buf)
+    {
         err = ERR_VAL;
         goto end;
     }
