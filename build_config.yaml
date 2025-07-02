@@ -139,7 +139,14 @@ common_projects:
 
   - path: example/bt/spp/project
     boards: 
+      - eh-lb563_hcpu
+      - eh-lb523_hcpu
+      - eh-lb525_hcpu
+      - sf32lb52-lcd_n16r8_hcpu
+      - sf32lb52-lcd_52d_hcpu
       - sf32lb58-lcd_n16r64n4
+      - sf32lb56-lcd_n16r12n1_hcpu
+      - sf32lb56-lcd_a128r12n1_hcpu
 
   - path: example/bt/test_example/project
     boards: *bt_boards
