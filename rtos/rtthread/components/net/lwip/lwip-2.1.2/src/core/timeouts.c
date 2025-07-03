@@ -309,7 +309,7 @@ void sys_timeouts_uninit(void)
     size_t i;
     for (i = 1; i < LWIP_ARRAYSIZE(lwip_cyclic_timers); i++)
     {
-        sys_untimeout(cyclic_timer, LWIP_CONST_CAST(void *, &lwip_cyclic_timers[i]));
+        sys_untimeout(lwip_cyclic_timer, LWIP_CONST_CAST(void *, &lwip_cyclic_timers[i]));
     }
 }
 
