@@ -2270,8 +2270,8 @@ def SifliGccEnv(cpu):
         rtconfig.CFLAGS = DEVICE + ' -mfpu=fpv5-sp-d16 -mfloat-abi=hard'
     else:
         rtconfig.CFLAGS = DEVICE + ' -mfloat-abi=soft'
-    rtconfig.CFLAGS += ' -std=c99 -funsigned-char -fshort-enums -fshort-wchar'
-    rtconfig.CFLAGS += ' -mlittle-endian -gdwarf-3 -Wno-packed -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-unused-macros -Wnull-dereference'
+    rtconfig.CFLAGS += ' -funsigned-char -fshort-enums -fshort-wchar'
+    rtconfig.CFLAGS += ' -mlittle-endian -gdwarf-3 -Wno-packed -Wno-missing-noreturn -Wno-sign-conversion -Wno-unused-macros -Wnull-dereference'
     rtconfig.CFLAGS += ' -fno-unwind-tables -fno-exceptions'
     rtconfig.CFLAGS += ' -fno-common'
     
@@ -2279,7 +2279,7 @@ def SifliGccEnv(cpu):
     rtconfig.CXXFLAGS = rtconfig.CFLAGS
     if no_dsp_fp:
         rtconfig.CXXFLAGS += ' -fno-exceptions -fno-rtti'
-    rtconfig.CCFLAGS =  rtconfig.CFLAGS
+    rtconfig.CCFLAGS =  rtconfig.CFLAGS + ' -std=c99 -Wno-missing-prototypes'
     rtconfig.AFLAGS = ' -c' + DEVICE
     if not no_dsp_fp:
         rtconfig.AFLAGS += ' -mfpu=fpv4-sp-d16 -mfloat-abi=hard'
