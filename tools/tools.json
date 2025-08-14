@@ -22,8 +22,86 @@
       "version_regex": "sftool\\s+([\\d.]+)",
       "versions": [
         {
-          "name": "0.1.7",
+          "name": "0.1.11",
           "status": "recommended",
+          "macos-arm64": {
+            "sha256": "D86146425A1351909FF78887F05542451CF2D6B41B47FC100749E0DB1605789A",
+            "size": 3292184,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.11/sftool-0.1.11-aarch64-apple-darwin.tar.xz"
+          },
+          "linux-arm64": {
+            "sha256": "7A24FB5DBED809CC7F509F171FB210863CBDC2A14AA83FA2C70F141991B46066",
+            "size": 3383844,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.11/sftool-0.1.11-aarch64-unknown-linux-gnu.tar.xz"
+          },
+          "win32": {
+            "sha256": "6639AC38EC62ED4AF5F1CDBCE3F6954C95A059EC38BAECA6A942C9A99B2E82F4",
+            "size": 3615868,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.11/sftool-0.1.11-i686-pc-windows-msvc.zip"
+          },
+          "linux-i686": {
+            "sha256": "8176F1B25216DD1A6FC7E66ABD8ACA5752C4757CDC2C94DAF099A91445B75C12",
+            "size": 3575576,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.11/sftool-0.1.11-i686-unknown-linux-gnu.tar.xz"
+          },
+          "macos": {
+            "sha256": "6ECB78C6AB5484414E25AEE3D8927EA70661B0CAA5739D7E15D6587439F80AEC",
+            "size": 3394192,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.11/sftool-0.1.11-x86_64-apple-darwin.tar.xz"
+          },
+          "win64": {
+            "sha256": "4D4546BD9687C15FDFB629ACB084365AECB5A8CC1C755EC52EA1871B6BBC8457",
+            "size": 3730836,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.11/sftool-0.1.11-x86_64-pc-windows-msvc.zip"
+          },
+          "linux-amd64": {
+            "sha256": "BD4F98DD9263BE5FDB7978846C2B50150FA1D3BBA43EE98ADC6DEC3545CB4FE9",
+            "size": 3511408,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.11/sftool-0.1.11-x86_64-unknown-linux-gnu.tar.xz"
+          }
+        },
+        {
+          "name": "0.1.10",
+          "status": "supported",
+          "macos-arm64": {
+            "sha256": "4B05A9E1C4AAD682862141AF3CF22E372514C7D39CD299DF7CECB4E6B3528AB5",
+            "size": 3291476,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.10/sftool-0.1.10-aarch64-apple-darwin.tar.xz"
+          },
+          "linux-arm64": {
+            "sha256": "CEF559A3E7AA8B0A40D31F1AB2D79D1952CFFC3C0BCA6AC25AE6EFCBEAE59882",
+            "size": 3382572,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.10/sftool-0.1.10-aarch64-unknown-linux-gnu.tar.xz"
+          },
+          "win32": {
+            "sha256": "9DC9518A2F20CA4555DC5962594DE789A1F10F050DEB8EF6E6E3EB6850BB9323",
+            "size": 3615952,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.10/sftool-0.1.10-i686-pc-windows-msvc.zip"
+          },
+          "linux-i686": {
+            "sha256": "61E7A061C5CF1BBCF0712969281D5CF62A0CEA37E2294F5618EF8780064103C5",
+            "size": 3568292,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.10/sftool-0.1.10-i686-unknown-linux-gnu.tar.xz"
+          },
+          "macos": {
+            "sha256": "9A0041883BF80662AB46B736472D58F75A79185E34C025790F0F348A49D7B797",
+            "size": 3390004,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.10/sftool-0.1.10-x86_64-apple-darwin.tar.xz"
+          },
+          "win64": {
+            "sha256": "311E09F6A3936E640B44D4499E290BF0622F6B66BFAD27EB312ED9B2FFAA7058",
+            "size": 3733765,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.10/sftool-0.1.10-x86_64-pc-windows-msvc.zip"
+          },
+          "linux-amd64": {
+            "sha256": "FF154FCA012F6FF7512204DEC8A2FD0355A77204E6EA6931534C0C0510CF2D1A",
+            "size": 3508636,
+            "url": "https://github.com/OpenSiFli/sftool/releases/download/0.1.10/sftool-0.1.10-x86_64-unknown-linux-gnu.tar.xz"
+          }
+        },
+        {
+          "name": "0.1.7",
+          "status": "supported",
           "macos-arm64": {
             "sha256": "8118579A4F70796D1A9F8BE1C57A5432C0CCEE21BDEE641710AAAFBCA9FAB18A",
             "size": 3225772,
