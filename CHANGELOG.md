@@ -1,4 +1,56 @@
-# SiFli SDK change Log v2.4.2
+# SiFli SDK change Log v2.4.3
+## Change log since v2.4.2
+
+### Drivers
+#### Fixed
+- nor: Fix address size error of OTP related command for type3 NOR Flash
+- lcdc: Waiting LCDC busy flag to be cleared in it's deinit function
+
+#### Changed
+- nor: Add MPI2 dual NOR Flash support for sf32lb52x
+- rcc: Reset GPIO2 when reset LPSYS to avoid GPOI2 interrupt flooding
+
+### Middleware
+#### Changed
+- lwip: Disable tls_malloc/tls_free registration for now as it's conflicted with tls_config.h when MBEDTLS_PLATFORM_MEMORY is defined
+- flashdb: Add `fdb_tsl_append_with_ts` API by sync with new FlashDB version
+- lvgl_v9: Add sequence image widget for LVGL v9
+
+### RTOS
+#### Fixed
+- Fix call stack not shown correctly after assertion if building using GCC
+- Clean D-Cache after scatter-loading copy code to PSRAM to solve crash issue for GCC build
+
+### Tools
+#### Fixed
+- build: Fix Keil toolchain is not available by subprocess in env
+- build: Fix NAND Flash download failure by sftool as `-m` parameter is missing from the generated sftool script
+- menuconfig: Update menuconfig.exe to support --board_search_path option
+
+#### Changed
+- build: Support GCC lib circular dependency
+- FsrwTool: Update FsrwTool usage manual
+- build: Update recommended sftool version from 0.1.7 to 0.1.12
+- ezip: Update to 2.4.0 to support LVGL v9
+- build: Add SCons `ConvertFont` method to convert `.ttf` file to `.c` file to be used by tinyttf lib of LVGL v9
+- build: Improve uart_download speed by skipping the same blocks
+
+### Examples
+#### Added 
+- Add watch example using LVGL v9 in `multimedia/lvgl/watch_v9`
+
+### BSP
+#### Fixed
+- board: Fixed QSPI screen not work on board `sf32lb58-lcd`
+
+#### Changed
+- board: Increase the flash frequency of some 52 series boards
+- board: Make flash sleep to save power on board `sf32lb52-lchspi-ulp`
+- board: Fixed IO current leakage on board `sf32lb52-lchspi-ulp`
+
+#### Added
+- board: Add board `eh-lb523_dual` which supports dual flash
+
 ## Change log since v2.4.1
 ### Bluetooth
 #### Fixed
