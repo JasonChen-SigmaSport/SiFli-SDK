@@ -65,7 +65,7 @@
                 "offset": "0x00000000", 
                 "max_size": "0x00800000", 
                 "tags": [
-                    "DATA_REGION"
+                    "DATA_REGION", "HCPU_FLASH2_IMG"
                 ],
                 "img": "main:ER_IROM2.bin"
             }, 
