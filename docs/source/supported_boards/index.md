@@ -12,14 +12,13 @@
 - A：表示板子使用了SPI NAND存储器，后面的数字为存储器的容量，单位为MB
 - N：表示板子使用了SPI NOR存储器，后面的数字为存储器的容量，单位为MB
 - R：表示板子使用了SPI PSRAM存储器，后面的数字为存储器的容量，单位为MB
+- E: 表示板子使用了eMMC存储器，后面的数字为存储器的容量，单位为GB
 
 对于一个示例`a128r32n1`来说，就是存在128MB的SPI NAND存储器、32MB的SPI PSRAM存储器和1MB的SPI NOR存储器。
 
-另外也可能代表具体的芯片规格，外置的Flash如没有特殊说明的情况下均为`16MB`。例如对于52系列来说，`52b`就代表使用的是 SF32LB52B 芯片，内置4MB的SPI NOR存储器；`52j`代表使用的是 SF32LB52J 芯片，内置8MB的SPI PSRAM存储器，并外置16MB的SPI NOR存储器。
-
 一些典型的示例：
 
-- `sf32lb52-nano_52b`：表示型号为 SF32LB52 的 Nano 版本开发板，使用 4MB 的 SPI NOR 存储器。
+- `sf32lb52-nano_n4`：表示型号为 SF32LB52 的 Nano 版本开发板，使用 4MB 的 SPI NOR 存储器。
 - `sf32lb56-lcd_a128r12n1`：表示型号为 SF32LB56 的 LCD 版本开发板，使用 128MB 的 SPI NAND 存储器、12MB 的 SPI PSRAM 存储器和 1MB 的 SPI NOR 存储器。
 
 ```{image} assets/folder.png
@@ -90,8 +89,29 @@ LCD-N16R12N1 | SF32LB56-DevKit-LCD |   sf32lb56-lcd_n16r12n1    |
 523-HDK      | EH-SF32LB52X(523)         |   eh-lb523    | 
 525-HDK      | EH-SF32LB52X(525)         |   eh-lb525    | 
 6500-HDK     | EH-SF32LB52X(6500)        |   eh-lb6500   | 
-NANO-52b  | Nano(52b)       |   sf32lb52-nano_52b    |
-NANO-52j  | Nano(52j)       |   sf32lb52-nano_52j    |
+NANO-52b  | Nano(4M)       |   sf32lb52-nano_n4    |
+NANO-52j  | Nano(16M+16M)       |   sf32lb52-nano_n16r16    |
 ULP(黄山派) | ULP(525)         |   sf32lb52-ulp    |
 LCD-525 | SF32LB52-DevKit-LCD(525) |   sf32lb52-lcd_n16r8    |
 LCD-52b | SF32LB52-DevKit-LCD(52b) |   sf32lb52-lcd_52d    |
+
+
+```{toctree}
+:titlesonly:
+:glob:
+
+boards/ec-lb587/doc/index
+boards/ec-lb587_a2/doc/index
+boards/sf32lb52-core_52j_e8/doc/index
+boards/sf32lb52-core_52j_n16/doc/index
+boards/sf32lb52-lcd_52d/doc/index
+boards/sf32lb52-lcd_n16r8/doc/index.
+boards/sf32lb52-lcd_n16r8_jdi/doc/index
+boards/sf32lb56-lcd_a128r12n1/doc/index
+boards/sf32lb56-lcd_n16r12n1/doc/index
+boards/sf32lb58-lcd_a128r32n1_dsi/doc/index
+boards/sf32lb58-lcd_n16r32n1_dpi/doc/index
+boards/sf32lb58-lcd_n16r32n1_dsi/doc/index
+boards/sf32lb58-lcd_n16r64n4/doc/index
+
+```
