@@ -432,6 +432,7 @@ FUNC_END:
 extern void *get_disp_buf(uint32_t size);
 //extern rt_err_t app_lv_task_mutex_take(void);
 //extern rt_err_t app_lv_task_mutex_release(void);
+#ifdef LVGL_V8
 #include "lvsf.h"
 
 static int framebuf_trans_out()
@@ -536,7 +537,7 @@ static int framebuf_trans_out()
 
     return 0;
 }
-
+#endif/*LVGL_V8 */
 #if WF_INSTAL_TEST
 static int elm_install_app_auto(const char *name)
 {
@@ -628,7 +629,9 @@ static int elm_trans_test(int argc, char **argv)
         }
         else
         {
+#ifdef LVGL_V8
             framebuf_trans_out();
+#endif/*LVGL_V8*/
         }
     }
     else if (argv[1][0] == '5')
