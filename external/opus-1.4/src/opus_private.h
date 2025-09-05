@@ -36,6 +36,10 @@
 #include <stdarg.h> /* va_list */
 #include <stddef.h> /* offsetof */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct OpusRepacketizer {
    unsigned char toc;
    int nb_frames;
@@ -197,5 +201,9 @@ int opus_multistream_decode_native(
   int soft_clip,
   void *user_data
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OPUS_PRIVATE_H */

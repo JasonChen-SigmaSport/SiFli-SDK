@@ -48,6 +48,9 @@
 #include "stdint.h"
 #include "stdbool.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * @brief  Initialize the MSP.
  *
@@ -151,90 +154,94 @@ void BSP_GPIO_Set(int pin, int val, int is_porta);
 
 #ifdef BSP_USING_PSRAM
 
-    /**
-    * @brief  psram controller hardware initial.
-    * @retval 0 if success.
-    */
-    int bsp_psramc_init(void);
+/**
+* @brief  psram controller hardware initial.
+* @retval 0 if success.
+*/
+int bsp_psramc_init(void);
 
-    /**
-    * @brief Get PSRAM clock frequency.
-    * @param addr base address of psram.
-    * @return Clock freqency for PSRAM
-    */
-    uint32_t bsp_psram_get_clk(uint32_t addr);
+/**
+* @brief Get PSRAM clock frequency.
+* @param addr base address of psram.
+* @return Clock freqency for PSRAM
+*/
+uint32_t bsp_psram_get_clk(uint32_t addr);
 
-    /**
-    * @brief Update PSRAM refresh rate.
-    * @param name name of PSRAM controller.
-    * @param value self refresh rate value
-    * @return RT_EOK if initial success, otherwise, -RT_ERROR.
-    */
-    int bsp_psram_update_refresh_rate(char *name, uint32_t value);
+/**
+* @brief Update PSRAM refresh rate.
+* @param name name of PSRAM controller.
+* @param value self refresh rate value
+* @return RT_EOK if initial success, otherwise, -RT_ERROR.
+*/
+int bsp_psram_update_refresh_rate(char *name, uint32_t value);
 
-    /**
-    * @brief PSRAM hardware enter low power.
-    * @param name name of PSRAM controller.
-    * @return RT_EOK if initial success, otherwise, -RT_ERROR.
-    */
-    int bsp_psram_enter_low_power(char *name);
+/**
+* @brief PSRAM hardware enter low power.
+* @param name name of PSRAM controller.
+* @return RT_EOK if initial success, otherwise, -RT_ERROR.
+*/
+int bsp_psram_enter_low_power(char *name);
 
-    /**
-    * @brief PSRAM hardware enter low power.
-    * @param name name of PSRAM controller.
-    * @return RT_EOK if initial success, otherwise, -RT_ERROR.
-    */
-    int bsp_psram_deep_power_down(char *name);
+/**
+* @brief PSRAM hardware enter low power.
+* @param name name of PSRAM controller.
+* @return RT_EOK if initial success, otherwise, -RT_ERROR.
+*/
+int bsp_psram_deep_power_down(char *name);
 
-    /**
-    * @brief PSRAM hardware exit from low power.
-    * @param name name of PSRAM controller.
-    * @return RT_EOK if initial success, otherwise, -RT_ERROR.
-    */
-    int bsp_psram_exit_low_power(char *name);
+/**
+* @brief PSRAM hardware exit from low power.
+* @param name name of PSRAM controller.
+* @return RT_EOK if initial success, otherwise, -RT_ERROR.
+*/
+int bsp_psram_exit_low_power(char *name);
 
-    /**
-    * @brief PSRAM set partial array self-refresh.
-    * @param name name of PSRAM controller.
-    * @param top set top part to self-refresh, else set bottom.
-    * @param deno denomenator for refresh, like 2 for 1/2 to refresh, only support 2^n,
-    *         when larger than 16, all memory not refresh, when 1 or 0, all meory auto refress by default.
-    * @return 0 if success.
-    */
-    int bsp_psram_set_pasr(char *name, uint8_t top, uint8_t deno);
+/**
+* @brief PSRAM set partial array self-refresh.
+* @param name name of PSRAM controller.
+* @param top set top part to self-refresh, else set bottom.
+* @param deno denomenator for refresh, like 2 for 1/2 to refresh, only support 2^n,
+*         when larger than 16, all memory not refresh, when 1 or 0, all meory auto refress by default.
+* @return 0 if success.
+*/
+int bsp_psram_set_pasr(char *name, uint8_t top, uint8_t deno);
 
-    /**
-    * @brief PSRAM auto calibrate delay.
-    * @param name name of PSRAM controller.
-    * @param sck sck delay pointer.
-    * @param dqs dqs delay pointer
-    * @return 0 if success.
-    */
-    int bsp_psram_auto_calib(char *name, uint8_t *sck, uint8_t *dqs);
+/**
+* @brief PSRAM auto calibrate delay.
+* @param name name of PSRAM controller.
+* @param sck sck delay pointer.
+* @param dqs dqs delay pointer
+* @return 0 if success.
+*/
+int bsp_psram_auto_calib(char *name, uint8_t *sck, uint8_t *dqs);
 
-    /**
-    * @brief Wait psram hardware idle.
-    * @return none.
-    */
-    void bsp_psram_wait_idle(char *name);
+/**
+* @brief Wait psram hardware idle.
+* @return none.
+*/
+void bsp_psram_wait_idle(char *name);
 
 #else
 
-    #define bsp_psramc_init() -1
-    #define bsp_psram_get_clk() 0
-    #define bsp_psram_update_refresh_rate(name,value) -1
-    #define bsp_psram_enter_low_power(name) -1
-    #define bsp_psram_deep_power_down(name) -1
-    #define bsp_psram_exit_low_power(name) -1
-    #define bsp_psram_set_pasr(name,top,deno) -1
-    #define bsp_psram_auto_calib(name,sck,dqs) -1
-    #define bsp_psram_wait_idle(name)
+#define bsp_psramc_init() -1
+#define bsp_psram_get_clk() 0
+#define bsp_psram_update_refresh_rate(name,value) -1
+#define bsp_psram_enter_low_power(name) -1
+#define bsp_psram_deep_power_down(name) -1
+#define bsp_psram_exit_low_power(name) -1
+#define bsp_psram_set_pasr(name,top,deno) -1
+#define bsp_psram_auto_calib(name,sck,dqs) -1
+#define bsp_psram_wait_idle(name)
 
 #endif
 
 /**
   * @}
   */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
