@@ -91,11 +91,13 @@ html_theme_options = {
 html_css_files = [
     'css/custom.css',
     'css/feedback.css',
+    'css/lightbox.css',
 ]
 
 html_js_files = [
     'js/baidu.js',
     'js/feedback.js',
+    'js/lightbox.js',
 ]
 
 # -- Options for Breathe ----------------------------------------------------
