@@ -245,11 +245,35 @@ hardfault发生时会打印如下信息，最后打印hardfault的类型，如�
 - _$SDK_ROOT/tools/crash_dump_analyser/simarm/t32marm.exe_：执行现场恢复脚本的Trace32软仿工具
 
 ## 3. 保存现场 
-### 通过BAT脚本保存现场
+
+### 3.1 通过BAT脚本保存现场
+
+#### 3.1.1 通过UART访问芯片保存现场(目前仅支持52x,56x)
+- 打开 _SifliUsartServer.exe_ 并点击连接，用DBGUART模拟Jlink（硬件上只需要串口线路连接）
+![](/assets/UsartServer.png)
+- 打开 _save_ram_55x.bat_ 窗口将会调用Jlink.exe，将 _SifliUsartServer.exe_ 中的SERVER地址填入Identifier中
+![](/assets/Jlink_command.png)
+
+#### 3.1.2 通过Jlink访问芯片保存现场
 以55x芯片为例：
-- 连接JLink仿真器到目标板(没有Jlink的芯片需要打开 _SifliUsartServer.exe_ 用DBGUART模拟Jlink)
+- 连接JLink仿真器到目标板
 - 双击执行 _tools/crash_dump_analyser/script/save_ram_55x.bat_ 读取目标板的数据，
 - 也可以在命令行，以watch_demp为例，在SDK根目录，调用 _SDK_ROOT/tools/crash_dump_analyser/script/save_ram_55x.bat_ ， _$SDK_ROOT/example/watch_demo/project/eh-lb555/build_ 这样可以把生成文件放入 _SDK_ROOT/example/watch_demo/project/eh-lb555/build_
+
+**保存现场失败的可能原因**：
+- 选择保存现场的方式与执行的脚本不匹配
+
+```使用UART硬件连接方式或使用Jlink硬件连接方式保存现场都是通过调用JLink.exe然后执行相应的Jlink命令来达到效果，可以查看 save_ram_55x.bat 以及被调用的 sf32lb55x.jlink 与 sf32lb52x.jlink 文件内容对比，ip则表示使用SifliUsartServer.exe的ip模拟Jlink方式保存现场，usb则表示使用uab连接JLink仿真器方式保存现场，在保存现场之前可以先确认执行的bat文件中调用的Jlink文件，以及Jlink命令，防止命令与实际保存现场方式不匹配导致保存现场失败```
+![](/assets/dump_command.png)
+
+- 死机程序是否大小核都启动了
+
+```在大多数例程当中小核并未被启动，例如sf32lb55x.jlink中有w4 0x4004f000 1 //Switch to LCPU命令但是程序并未启动小核则保持现场会失败，我们需要将对小核发起的命令进行注释以保证脚本正常运行```
+![](/assets/dump_select.png)
+
+
+
+
 
 成功后会生成以下几个文件(由对应的sf32lb55x.jlink的内容而定)：
 - _hcpu_ram.bin_：1Mbyte的HCPU RAM数据
@@ -267,7 +291,7 @@ hardfault发生时会打印如下信息，最后打印hardfault的类型，如�
 - _lcpu_ram.bin_: 224Kbyte的LCPU RAM数据
 - _lcpu_dtcm.bin_: 16Kbyte的LCPU DTCM数据
 
-### 通过AssertDumpUart工具保存现场
+### 3.2 通过AssertDumpUart工具保存现场
 该工具直接连接debuguart口，然后执行对应的jlink脚本保存现场，无需 _SifliUsartServer.exe_ 模拟Jlink.
 以52x芯片为例：
 - 打开 _$SDK_ROOT/tools/crash_dump_analyser/script/AssertDumpUart.exe_
@@ -286,7 +310,7 @@ hardfault发生时会打印如下信息，最后打印hardfault的类型，如�
 
 #### 点击HA按钮(HCPU assertion)
 - 选择当前的芯片，设置前面保存现场导出的bin所在的路径(注意路径最后没有带斜杠)，以及手动放置的axf文件，来查看HCPU的死机现场。
-- 如果有些bin不存在（例如有的dump没有PSRAM），可以勾掉。
+- 如果有些bin不存在（例如有的dump没有PSRAM），可以取消勾选。
 
 ![](/assets/crash_analysis_load_hcpu_assertion_ui.png)
 
@@ -297,7 +321,14 @@ hardfault发生时会打印如下信息，最后打印hardfault的类型，如�
 
 可以在Window菜单切换显示的窗口
 
+如果窗口不小心关闭了也可以在下方B::后输入命令运行唤醒：
+
+例如：我们可以下方图片信息得知heapAllocation窗口，全称是 _B::AREA.view heapAllocation_ ，我们可以输入此命令来打开对应窗口，也可以直接输入 _AREA.view heapAllocation_
+
 ![](/assets/crash_analysis_hcpu_window_select.png)
+
+
+`B::v.f /l /c `窗口是死机现场的函数调用栈
 
 heapAllocation窗口显示了系统中所有heap pool的分配情况，包括system heap以及memheap_pool：
 - system heap：rt_malloc和lv_mem_alloc使用的pool
@@ -312,14 +343,17 @@ heapAllocation窗口显示了系统中所有heap pool的分配情况，包括sys
 - RETURN ADDR: 申请者地址
 
 #### 没有显示异常栈的处理
-做完前面3个步骤，有时候不会显示死机的现场栈，可能是dump内容中没有保存或者保存的异常，可以尝试以下2种办法：
-- 从Jlink halt的log信息加载现场栈
+做完前面3个步骤，有时候不会显示死机的现场栈，可能是dump内容中没有保存或者保存的异常，可以尝试以下几种办法：
+- 1. 从Jlink halt的log信息加载现场栈
 HR(HCPU Registers)按钮用于恢复没有走到异常处理程序的CPU寄存器
 点击按钮后选择导出现场的 _log.txt_ 文件，他将把里面HCPU的16个寄存器回填到trace32
 ![](/assets/crash_analysis_toolsbar_HR.png)
 
-- 从log里面打印的16个寄存器中，回填到trace32的register窗口中
+- 2. 从log里面打印的16个寄存器中，回填到trace32的register窗口中
 ![](/assets/crash_analysis_restore_registers_from_log.png)
+
+- 3. gcc编译的可以尝试将PC修改成和r14的值一样
+![](/assets/crash_analysis_toolsbar_HR2.png)
 
 ### 4.2 LCPU恢复现场
 
