@@ -209,7 +209,7 @@ static void BSP_PIN_Common(void)
     /* Keep default pull-down unchanged. Uart download driver would use this function,
      * if pulldown is disabled, download driver would not work on the board without external pull-down
      */
-
+    BSP_GPIO_Set(21, 0, 1);
 #endif
 
 }
