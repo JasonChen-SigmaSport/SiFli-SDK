@@ -13,4 +13,8 @@ menuconfig RGB_SK6812MINI_HS_ENABLE
             int "Channel"
             default "4"
         depends on RGB_USING_SK6812MINI_HS_DEV_NAME
+                config BSP_RGB_LED_COUNT
+            int "Number of RGB LEDs"
+            default 1
+        depends on RGB_USING_SK6812MINI_HS_DEV_NAME  
     endif

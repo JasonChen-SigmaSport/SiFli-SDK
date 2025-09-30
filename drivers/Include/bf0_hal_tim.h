@@ -1657,7 +1657,7 @@ HAL_StatusTypeDef HAL_GPT_PWM_Stop_IT(GPT_HandleTypeDef *htim, uint32_t Channel)
 
 /* Non-Blocking mode: DMA */
 /**
-  * @brief  Starts the TIM PWM signal generation in DMA mode.
+  * @brief  Starts the TIM PWM signal generation in CXX DMA mode.
   * @param  htim pointer to a GPT_HandleTypeDef structure that contains
   *                the configuration information for TIM module.
   * @param  Channel TIM Channels to be enabled.
@@ -1673,6 +1673,22 @@ HAL_StatusTypeDef HAL_GPT_PWM_Stop_IT(GPT_HandleTypeDef *htim, uint32_t Channel)
 HAL_StatusTypeDef HAL_GPT_PWM_Start_DMA(GPT_HandleTypeDef *htim, uint32_t Channel, uint32_t *pData, uint16_t Length);
 
 /**
+  * @brief  Starts the TIM PWM signal generation in Update DMA mode.
+  * @param  htim pointer to a GPT_HandleTypeDef structure that contains
+  *                the configuration information for TIM module.
+  * @param  Channel TIM Channels to be enabled.
+  *          This parameter can be one of the following values:
+  *            @arg GPT_CHANNEL_1: TIM Channel 1 selected
+  *            @arg GPT_CHANNEL_2: TIM Channel 2 selected
+  *            @arg GPT_CHANNEL_3: TIM Channel 3 selected
+  *            @arg GPT_CHANNEL_4: TIM Channel 4 selected
+  * @param  pData The source Buffer address.
+  * @param  Length The length of data to be transferred from memory to TIM peripheral
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_GPT_PWM_Update_Start_DMA(GPT_HandleTypeDef *htim, uint32_t Channel, uint32_t *pData, uint16_t Length);
+
+/**
   * @brief  Stops the TIM PWM signal generation in DMA mode.
   * @param  htim pointer to a GPT_HandleTypeDef structure that contains
   *                the configuration information for TIM module.
@@ -1685,6 +1701,19 @@ HAL_StatusTypeDef HAL_GPT_PWM_Start_DMA(GPT_HandleTypeDef *htim, uint32_t Channe
   * @retval HAL status
   */
 HAL_StatusTypeDef HAL_GPT_PWM_Stop_DMA(GPT_HandleTypeDef *htim, uint32_t Channel);
+/**
+  * @brief  Stops the TIM PWM signal generation in Update DMA mode.
+  * @param  htim pointer to a GPT_HandleTypeDef structure that contains
+  *                the configuration information for TIM module.
+  * @param  Channel TIM Channels to be disabled.
+  *          This parameter can be one of the following values:
+  *            @arg GPT_CHANNEL_1: TIM Channel 1 selected
+  *            @arg GPT_CHANNEL_2: TIM Channel 2 selected
+  *            @arg GPT_CHANNEL_3: TIM Channel 3 selected
+  *            @arg GPT_CHANNEL_4: TIM Channel 4 selected
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_GPT_PWM_Update_Stop_DMA(GPT_HandleTypeDef *htim, uint32_t Channel);
 
 /**
   * @}

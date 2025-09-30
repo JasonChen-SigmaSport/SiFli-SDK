@@ -58,9 +58,6 @@ extern "C" {
 #define PWM5_CORE CORE_ID_LCPU
 #define PWM6_CORE CORE_ID_LCPU
 
-
-
-
 #ifdef BSP_USING_PWM2
 #define PWM2_CONFIG                             \
     {                                           \
@@ -71,6 +68,19 @@ extern "C" {
     }
 #endif /* BSP_USING_PWM2 */
 
+#ifdef BSP_PWM2_UPDATE_USING_DMA
+#define PWM2_UPDATE_DMA_CONFIG                             \
+    {                                           \
+       .dma_handle.Init.Priority = PWM2_UPDATE_DMA_IRQ_PRIO,           \
+       .dma_handle.Instance = PWM2_UPDATE_DMA_INSTANCE,               \
+       .dma_handle.Init.Request = GPTIM1_UPDATE_DMA_REQUEST,                 \
+       .dma_irq = PWM2_UPDATE_DMA_IRQ,                     \
+       .dma_handle_index = GPT_DMA_ID_UPDATE,                \
+       .dma_handle.Init.PeriphDataAlignment    = PWM2_UPDATE_DMA_PDATAALIGN,         \
+       .dma_handle.Init.MemDataAlignment   = PWM2_UPDATE_DMA_MDATAALIGN           \
+    }
+#endif /* BSP_PWM2_UPDATE_USING_DMA */
+
 #ifdef BSP_USING_PWM3
 #define PWM3_CONFIG                             \
     {                                           \
@@ -78,6 +88,19 @@ extern "C" {
        .tim_handle.core         = PWM3_CORE,    \
        .name                    = "pwm3",       \
        .channel                 = 0             \
+    }
+#endif /* BSP_USING_PWM3 */
+
+#ifdef BSP_PWM3_UPDATE_USING_DMA
+#define PWM3_UPDATE_DMA_CONFIG                             \
+    {                                           \
+       .dma_handle.Init.Priority = PWM3_UPDATE_DMA_IRQ_PRIO,           \
+       .dma_handle.Instance = PWM3_UPDATE_DMA_INSTANCE,               \
+       .dma_handle.Init.Request = GPTIM2_UPDATE_DMA_REQUEST,                 \
+       .dma_irq = PWM3_UPDATE_DMA_IRQ,                     \
+       .dma_handle_index = GPT_DMA_ID_UPDATE,                \
+       .dma_handle.Init.PeriphDataAlignment    = PWM3_UPDATE_DMA_PDATAALIGN,         \
+       .dma_handle.Init.MemDataAlignment   = PWM3_UPDATE_DMA_MDATAALIGN           \
     }
 #endif /* BSP_USING_PWM3 */
 
@@ -91,6 +114,45 @@ extern "C" {
     }
 #endif /* BSP_USING_PWM4 */
 
+#ifdef BSP_PWM4_UPDATE_USING_DMA
+#define PWM4_UPDATE_DMA_CONFIG                             \
+    {                                           \
+       .dma_handle.Init.Priority = PWM4_UPDATE_DMA_IRQ_PRIO,           \
+       .dma_handle.Instance = PWM4_UPDATE_DMA_INSTANCE,               \
+       .dma_handle.Init.Request = GPTIM3_UPDATE_DMA_REQUEST,                 \
+       .dma_irq = PWM4_UPDATE_DMA_IRQ,                     \
+       .dma_handle_index = GPT_DMA_ID_UPDATE,                \
+       .dma_handle.Init.PeriphDataAlignment    = PWM4_UPDATE_DMA_PDATAALIGN,         \
+       .dma_handle.Init.MemDataAlignment   = PWM4_UPDATE_DMA_MDATAALIGN           \
+    }
+#endif /* BSP_PWM4_UPDATE_USING_DMA */
+
+#ifdef BSP_PWM4_CC4_USING_DMA
+#define PWM4_CC4_DMA_CONFIG                             \
+    {                                           \
+       .dma_handle.Init.Priority = PWM4_CC4_DMA_IRQ_PRIO,           \
+       .dma_handle.Instance = PWM4_CC4_DMA_INSTANCE,               \
+       .dma_handle.Init.Request = PWM4_CC4_DMA_REQUEST,                 \
+       .dma_irq = PWM4_CC4_DMA_IRQ,                     \
+       .dma_handle_index = GPT_DMA_ID_CC4,                \
+       .dma_handle.Init.PeriphDataAlignment    = PWM4_CC4_DMA_PDATAALIGN,         \
+       .dma_handle.Init.MemDataAlignment   = PWM4_CC4_DMA_MDATAALIGN           \
+    }
+#endif /* BSP_PWM4_CC4_USING_DMA */
+
+#ifdef BSP_PWM4_CC4_USING_DMA
+#define PWM4_CC4_DMA_CONFIG                             \
+    {                                           \
+       .dma_handle.Init.Priority = PWM4_CC4_DMA_IRQ_PRIO,           \
+       .dma_handle.Instance = PWM4_CC4_DMA_INSTANCE,               \
+       .dma_handle.Init.Request = PWM4_CC4_DMA_REQUEST,                 \
+       .dma_irq = PWM4_CC4_DMA_IRQ,                     \
+       .dma_handle_index = GPT_DMA_ID_CC4,                \
+       .dma_handle.Init.PeriphDataAlignment    = PWM4_CC4_DMA_PDATAALIGN,         \
+       .dma_handle.Init.MemDataAlignment   = PWM4_CC4_DMA_MDATAALIGN           \
+    }
+#endif /* BSP_PWM4_CC4_USING_DMA */
+
 #ifdef BSP_USING_PWM5
 #define PWM5_CONFIG                             \
     {                                           \
@@ -101,6 +163,19 @@ extern "C" {
     }
 #endif /* BSP_USING_PWM5 */
 
+#ifdef BSP_PWM5_UPDATE_USING_DMA
+#define PWM5_UPDATE_DMA_CONFIG                             \
+        {                                           \
+           .dma_handle.Init.Priority = PWM5_UPDATE_DMA_IRQ_PRIO,           \
+           .dma_handle.Instance = PWM5_UPDATE_DMA_INSTANCE,               \
+           .dma_handle.Init.Request = GPTIM4_UPDATE_DMA_REQUEST,                 \
+           .dma_irq = PWM5_UPDATE_DMA_IRQ,                     \
+           .dma_handle_index = GPT_DMA_ID_UPDATE,                \
+           .dma_handle.Init.PeriphDataAlignment    = PWM5_UPDATE_DMA_PDATAALIGN,         \
+           .dma_handle.Init.MemDataAlignment   = PWM5_UPDATE_DMA_MDATAALIGN           \
+        }
+#endif /* BSP_PWM5_UPDATE_USING_DMA */
+
 #ifdef BSP_USING_PWM6
 #define PWM6_CONFIG                             \
     {                                           \
@@ -110,6 +185,18 @@ extern "C" {
        .channel                 = 0             \
     }
 #endif /* BSP_USING_PWM5 */
+#ifdef BSP_PWM6_UPDATE_USING_DMA
+#define PWM6_UPDATE_DMA_CONFIG                             \
+        {                                           \
+           .dma_handle.Init.Priority = PWM6_UPDATE_DMA_IRQ_PRIO,           \
+           .dma_handle.Instance = PWM6_UPDATE_DMA_INSTANCE,               \
+           .dma_handle.Init.Request = GPTIM5_UPDATE_DMA_REQUEST,                 \
+           .dma_irq = PWM6_UPDATE_DMA_IRQ,                     \
+           .dma_handle_index = GPT_DMA_ID_UPDATE,                \
+           .dma_handle.Init.PeriphDataAlignment    = PWM6_UPDATE_DMA_PDATAALIGN,         \
+           .dma_handle.Init.MemDataAlignment   = PWM6_UPDATE_DMA_MDATAALIGN           \
+        }
+#endif /* BSP_PWM6_UPDATE_USING_DMA */
 
 #ifdef BSP_USING_PWMA1
 #define PWMA1_CONFIG                             \
@@ -120,6 +207,18 @@ extern "C" {
            .channel                 = 0             \
         }
 #endif /* BSP_USING_PWM_A1 */
+#ifdef BSP_PWMA1_UPDATE_USING_DMA
+#define PWMA1_UPDATE_DMA_CONFIG                             \
+        {                                           \
+           .dma_handle.Init.Priority = PWMA1_UPDATE_DMA_IRQ_PRIO,           \
+           .dma_handle.Instance = PWMA1_UPDATE_DMA_INSTANCE,               \
+           .dma_handle.Init.Request = ATIM1_UPDATE_DMA_REQUEST,                 \
+           .dma_irq = PWMA1_UPDATE_DMA_IRQ,                     \
+           .dma_handle_index = GPT_DMA_ID_UPDATE,                \
+           .dma_handle.Init.PeriphDataAlignment    = PWMA1_UPDATE_DMA_PDATAALIGN,         \
+           .dma_handle.Init.MemDataAlignment   = PWMA1_UPDATE_DMA_MDATAALIGN           \
+        }
+#endif /* BSP_PWMA1_UPDATE_USING_DMA */
 
 #ifdef BSP_USING_PWMA2
 #define PWMA2_CONFIG                             \
@@ -130,6 +229,18 @@ extern "C" {
            .channel                 = 0             \
         }
 #endif /* BSP_USING_PWM_A2 */
+#ifdef BSP_PWMA2_UPDATE_USING_DMA
+#define PWMA2_UPDATE_DMA_CONFIG                             \
+    {                                           \
+       .dma_handle.Init.Priority = PWMA2_UPDATE_DMA_IRQ_PRIO,           \
+       .dma_handle.Instance = PWMA2_UPDATE_DMA_INSTANCE,               \
+       .dma_handle.Init.Request = ATIM2_UPDATE_DMA_REQUEST,                 \
+       .dma_irq = PWMA2_UPDATE_DMA_IRQ,                     \
+       .dma_handle_index = GPT_DMA_ID_UPDATE,                \
+       .dma_handle.Init.PeriphDataAlignment    = PWMA2_UPDATE_DMA_PDATAALIGN,         \
+       .dma_handle.Init.MemDataAlignment   = PWMA2_UPDATE_DMA_MDATAALIGN           \
+    }
+#endif /* BSP_PWMA2_UPDATE_USING_DMA */
 
 #ifdef BSP_USING_PWM_LPTIM1
 #define PWM_LPTIM1_CONFIG                       \
@@ -155,18 +266,7 @@ extern "C" {
        .name                    = "pwmlp3",       \
     }
 #endif /* BSP_USING_PWM_LPTIM3 */
-#ifdef BSP_PWM4_CC4_USING_DMA
-#define PWM4_CC4_DMA_CONFIG                             \
-{                                           \
-   .dma_handle.Init.Priority = PWM4_CC4_DMA_IRQ_PRIO,           \
-   .dma_handle.Instance = PWM4_CC4_DMA_INSTANCE,               \
-   .dma_handle.Init.Request = PWM4_CC4_DMA_REQUEST,                 \
-   .dma_irq = PWM4_CC4_DMA_IRQ,                     \
-   .dma_handle_index = GPT_DMA_ID_CC4,                \
-   .dma_handle.Init.PeriphDataAlignment    = PWM4_CC4_DMA_PDATAALIGN,         \
-   .dma_handle.Init.MemDataAlignment   = PWM4_CC4_DMA_MDATAALIGN           \
-}
-#endif /* BSP_PWM4_CC4_USING_DMA */
+
 #ifdef BSP_PWM5_CC1_USING_DMA
 #define PWM5_CC1_DMA_CONFIG                             \
 {                                           \

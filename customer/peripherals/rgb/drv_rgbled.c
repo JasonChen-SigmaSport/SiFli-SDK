@@ -47,7 +47,7 @@
 
 #include <board.h>
 #include "bf0_hal_rcc.h"
-
+#include "drv_rgbled.h"
 
 /** @addtogroup bsp_driver Driver IO
   * @{
@@ -68,181 +68,205 @@
 #define LOG_TAG             "drv.rgb"
 #include <drv_log.h>
 
-struct rt_device_pwm *global_device = RT_NULL;
-
-#define RGB_COLOR_LEN   24
+#define RGB_COLOR_BITS_PER_LED   24
 #define RGB_REST_LEN   300
-#define RGB_STOP_LEN   1
+#define RGB_STOP_LEN   50
 
-#define pwm_peroid  1600        // reg value =24
-#define pulse_peroid  800
+// Calculate total buffer size based on configured LED count
+#define RGB_TOTAL_COLOR_LEN   (RGB_COLOR_BITS_PER_LED * BSP_RGB_LED_COUNT)
+#define RGB_TOTAL_BUFFER_LEN  (RGB_REST_LEN + RGB_TOTAL_COLOR_LEN + RGB_STOP_LEN)
 
-#define reg_high 18
-#define reg_low  7
-#define reg_end  50
+/* PWM timing parameters for SK6812 protocol
+ * Based on 48MHz timer clock with prescaler resulting in 30MHz counter
+ * Period = 1600 ticks = 53.3μs (close to SK6812's 1.25μs ± 0.6μs requirement)
+ */
+#define pwm_period  1600        /*!< PWM period in timer ticks */
+#define pulse_period  800       /*!< PWM pulse width in timer ticks (50% duty cycle base) */
 
-
-struct rt_device_rgb;
-
-struct rt_rgb_ops
-{
-    rt_err_t (*control)(struct rt_device_rgb *device, int cmd, void *arg);
-};
-
-struct rt_device_rgb
-{
-    struct rt_device parent;
-    const struct rt_rgb_ops *ops;
-};
+/* SK6812 protocol timing values (PWM compare register values)
+ * reg_high: ~0.8μs high time for logic '1' (18/30MHz = 0.6μs + rise time)
+ * reg_low:  ~0.4μs high time for logic '0' (7/30MHz = 0.23μs + rise time)
+ * reg_end:  Long high pulse for reset/latch signal (50/30MHz = 1.67μs)
+ */
+#define reg_high 18    /*!< PWM compare value for logic '1' */
+#define reg_low  7     /*!< PWM compare value for logic '0' */
+#define reg_end  50    /*!< PWM compare value for end/reset signal */
 
 #ifdef RGB_USING_SK6812MINI_HS_DEV_NAME
     #define RGBLED_NAME "rgbled"
 #endif
 
-L1_NON_RET_BSS_SECT_BEGIN(rgb_led_buf)
-L1_NON_RET_BSS_SECT(rgb_led_buf, ALIGN(16) static uint16_t rgb_buff[RGB_REST_LEN + RGB_COLOR_LEN + RGB_STOP_LEN]);
-L1_NON_RET_BSS_SECT_END
-
-
 struct bf0_rgbled
 {
-    struct rt_device_rgb rgb_device;
-    char *name;                         /*!<Device name*/
+    struct rt_device device;                      /*!< RT-Thread device base */
+    struct rt_device_pwm *pwm_device;             /*!< PWM device handle */
+    char *name;                                   /*!< Device name */
+    rt_uint16_t max_led_count;                    /*!< Maximum supported LED count */
+    uint16_t rgb_buffer[RGB_TOTAL_BUFFER_LEN];    /*!< Static RGB buffer */
 };
 
-static struct bf0_rgbled bf0_rgbled_obj[] =
-{
 #ifdef RGB_USING_SK6812MINI_HS_DEV_NAME
-    {.name = RGBLED_NAME}
+static struct bf0_rgbled bf0_rgbled_obj =
+{
+    .name = RGBLED_NAME,
+    .max_led_count = BSP_RGB_LED_COUNT,
+    .rgb_buffer = {0},                            // Static buffer initialized to 0
+    .pwm_device = RT_NULL
+};
 #endif
-};
 
+static rt_err_t drv_rgbled_control(rt_device_t device, int cmd, void *arg);
 
-static rt_err_t drv_rgbled_control(struct rt_device_rgb *device, int cmd, void *arg);
-static struct rt_rgb_ops drv_ops =
+/**
+ * @brief Create color array for LEDs
+ * @param rgb_obj RGB LED device object
+ * @param colors Array of RGB color values
+ * @param led_count Number of LEDs
+ */
+static void create_color_array(struct bf0_rgbled *rgb_obj, rt_uint32_t *colors, rt_uint16_t led_count)
 {
-    drv_rgbled_control
-};
-
-
-
-static void creater_color_array(uint32_t color)
-{
-    uint16_t i;
-    rt_memset(rgb_buff, 0, sizeof(uint16_t) * RGB_REST_LEN + RGB_COLOR_LEN + 1);
-    uint8_t red = (uint8_t)((color & 0x00ff0000) >> 16);
-    uint8_t green = (uint8_t)((color & 0x0000ff00) >> 8);
-    uint8_t blue = (uint8_t)((color & 0x000000ff) >> 0);
-
-    for (i = 0; i < 8; i++)
+    if (led_count > rgb_obj->max_led_count)
     {
-        if ((green << i) & 0x80)
-        {
-            rgb_buff[i + RGB_REST_LEN] = reg_high;
-        }
-        else
-        {
-            rgb_buff[i + RGB_REST_LEN] = reg_low;
-        }
+        LOG_E("LED count %d exceeds maximum %d", led_count, rgb_obj->max_led_count);
+        led_count = rgb_obj->max_led_count;
     }
-    for (i = 0; i < 8; i++)
+
+    rt_memset(rgb_obj->rgb_buffer, 0, sizeof(rgb_obj->rgb_buffer));
+
+    uint16_t offset = RGB_REST_LEN;
+
+    for (int led = 0; led < led_count; led++)
     {
-        if ((red << i) & 0x80)
+        uint32_t color = colors[led];
+        uint8_t red = (uint8_t)((color & 0x00ff0000) >> 16);
+        uint8_t green = (uint8_t)((color & 0x0000ff00) >> 8);
+        uint8_t blue = (uint8_t)((color & 0x000000ff) >> 0);
+
+        uint16_t led_offset = offset + (led * RGB_COLOR_BITS_PER_LED);
+
+        // Optimized: Encode all three colors in one loop (GRB order for SK6812)
+        for (int i = 0; i < 8; i++)
         {
-            rgb_buff[i + 8 + RGB_REST_LEN] = reg_high;
-        }
-        else
-        {
-            rgb_buff[i + 8 + RGB_REST_LEN] = reg_low;
+            // Encode Green (GRB order for SK6812)
+            rgb_obj->rgb_buffer[led_offset + i] = ((green << i) & 0x80) ? reg_high : reg_low;
+            // Encode Red
+            rgb_obj->rgb_buffer[led_offset + i + 8] = ((red << i) & 0x80) ? reg_high : reg_low;
+            // Encode Blue
+            rgb_obj->rgb_buffer[led_offset + i + 16] = ((blue << i) & 0x80) ? reg_high : reg_low;
         }
     }
 
-    for (i = 0; i < 8; i++)
-    {
-        if ((blue << i) & 0x80)
-        {
-            rgb_buff[i + 16 + RGB_REST_LEN] = reg_high;
-        }
-        else
-        {
-            rgb_buff[i + 16 + RGB_REST_LEN] = reg_low;
-        }
-    }
-    rgb_buff[RGB_REST_LEN + RGB_COLOR_LEN] = reg_end;
+    // Add stop signal after all LEDs
+    rgb_obj->rgb_buffer[RGB_REST_LEN + (led_count * RGB_COLOR_BITS_PER_LED)] = reg_end;
 
 #ifdef DRV_DEBUG
-    for (i = RGB_REST_LEN; i < RGB_REST_LEN + RGB_COLOR_LEN + RGB_STOP_LEN; i++)
-    {
-        rt_kprintf("%d,", rgb_buff[i]);
-    }
+    LOG_D("Color array created for %d LEDs", led_count);
 #endif
-    return;
 }
 
 /**
-* @brief  rgbled update color.
-* @param[in]  htim: GPT device object handle.
-* @param[in]  configuration: GPT configuration, mainly GPT channel number, color.
+* @brief  Send RGB data to LEDs
+* @param[in]  rgb_obj: RGB LED object handle.
+* @param[in]  led_count: Number of LEDs to update.
 * @retval RT_EOK if success, otherwise -RT_ERROR
 */
-static rt_err_t drv_rgbled_update_color(struct bf0_rgbled *rgb_obj, struct rt_rgbled_configuration *configuration)
+static rt_err_t drv_rgbled_send_data(struct bf0_rgbled *rgb_obj, rt_uint16_t led_count)
 {
-
-    creater_color_array(configuration->color_rgb);
-
-
     struct rt_pwm_configuration config;
+    rt_err_t result;
 
     rt_memset((void *)&config, 0, sizeof(config));
+
 #ifdef BSP_USING_RGBLED_CH
     config.channel = BSP_USING_RGBLED_CH;
 #else
-    LOG_I("NO CONFIG BSP_USING_RGBLED_CH");
+    LOG_E("NO CONFIG BSP_USING_RGBLED_CH");
+    return -RT_ERROR;
 #endif
-    config.period = pwm_peroid;//1600
-    config.pulse = pulse_peroid;//800
-    //DMA is transferred to ccr
-    config.dma_data = (rt_uint16_t *)rgb_buff;
-    config.data_len = RGB_REST_LEN + RGB_REST_LEN + RGB_STOP_LEN;
 
+    config.period = pwm_period;
+    config.pulse = pulse_period;
+    config.dma_type = 0;
+    config.dma_data = (rt_uint16_t *)rgb_obj->rgb_buffer;
+    config.data_len = RGB_REST_LEN + (led_count * RGB_COLOR_BITS_PER_LED) + RGB_STOP_LEN;
 
+    // Set PWM configuration with error checking
+    result = rt_device_control((struct rt_device *)rgb_obj->pwm_device, PWM_CMD_SET, (void *)&config);
+    if (result != RT_EOK)
+    {
+        LOG_E("PWM_CMD_SET failed with error %d", result);
+        return result;
+    }
 
-    rt_device_control((struct rt_device *)global_device, PWM_CMD_SET, (void *)&config);
-    rt_device_control((struct rt_device *)global_device, PWM_CMD_ENABLE, (void *)&config); //DMA -- rgb_buffer
+    // Enable PWM output with error checking
+    result = rt_device_control((struct rt_device *)rgb_obj->pwm_device, PWM_CMD_ENABLE, (void *)&config);
+    if (result != RT_EOK)
+    {
+        LOG_E("PWM_CMD_ENABLE failed with error %d", result);
+        return result;
+    }
+
     return RT_EOK;
 }
 
 /**
 * @brief  rgbled controls.
-* @param[in]  device: pwm device handle.
+* @param[in]  device: rgb device handle.
 * @param[in]  cmd: control commands.
 * @param[in]  arg: control command arguments.
 * @retval RT_EOK if success, otherwise -RT_ERROR
 */
-static rt_err_t drv_rgbled_control(struct rt_device_rgb *device, int cmd, void *arg)
+static rt_err_t drv_rgbled_control(rt_device_t device, int cmd, void *arg)
 {
-
-    struct rt_rgbled_configuration *configuration = (struct rt_rgbled_configuration *)arg;
-
-    struct bf0_rgbled *rgb_obj  = (struct bf0_rgbled *) device->parent.user_data;
-
-    if ((RT_DEVICE_CTRL_RESUME != cmd) && (RT_DEVICE_CTRL_SUSPEND != cmd))
-    {
-        /* arg is not configuration for RESUME and SUSPEND command */
-        // RT_ASSERT(configuration->color_rgb > 0); //Channel id must > 0
-    }
+    struct bf0_rgbled *rgb_obj = (struct bf0_rgbled *) device->user_data;
 
     switch (cmd)
     {
+    case RGB_CMD_SET_SINGLE_COLOR:
     case PWM_CMD_SET_COLOR:
-        drv_rgbled_update_color(rgb_obj, configuration);//通过传入的命令更新灯颜色
-        break;
-    default:
-        break;
-    }
-    return RT_EOK;
-}
+    {
+        struct rt_rgbled_configuration *single_config = (struct rt_rgbled_configuration *)arg;
+        if (!single_config)
+        {
+            LOG_E("Invalid single color configuration");
+            return -RT_ERROR;
+        }
 
+        rt_uint32_t color = single_config->color_rgb;
+
+        create_color_array(rgb_obj, &color, 1);
+        return drv_rgbled_send_data(rgb_obj, 1);
+    }
+    case RGB_CMD_SET_MULTI_COLOR:
+    {
+        struct rt_rgbled_multi_configuration *multi_config = (struct rt_rgbled_multi_configuration *)arg;
+        if (!multi_config || !multi_config->color_array || multi_config->led_count == 0)
+        {
+            LOG_E("Invalid multi-color configuration");
+            return -RT_ERROR;
+        }
+
+        create_color_array(rgb_obj, multi_config->color_array, multi_config->led_count);
+        return drv_rgbled_send_data(rgb_obj, multi_config->led_count);
+    }
+    case RGB_CMD_GET_CAPABILITY:
+    {
+        rt_uint32_t *led_count = (rt_uint32_t *)arg;
+        if (!led_count)
+        {
+            LOG_E("Invalid capability query parameter");
+            return -RT_ERROR;
+        }
+
+        // Return maximum LED count
+        *led_count = BSP_RGB_LED_COUNT;
+        return RT_EOK;
+    }
+    default:
+        LOG_W("Unknown command: %d", cmd);
+        return -RT_EINVAL;
+    }
+}
 
 /**
 * @brief RGBLED device driver initialization.
@@ -251,116 +275,43 @@ static rt_err_t drv_rgbled_control(struct rt_device_rgb *device, int cmd, void *
 */
 static int bf0_rgbled_init(void)
 {
-
-    int i = 0;
     int result = RT_EOK;
 
 #ifdef RGB_USING_SK6812MINI_HS_PWM_DEV_NAME
-    //find pwm_device
-    global_device = (struct rt_device_pwm *)rt_device_find(RGB_USING_SK6812MINI_HS_PWM_DEV_NAME);//find pwm
-    if (!global_device)
+    // Find PWM device
+    bf0_rgbled_obj.pwm_device = (struct rt_device_pwm *)rt_device_find(RGB_USING_SK6812MINI_HS_PWM_DEV_NAME);
+    if (!bf0_rgbled_obj.pwm_device)
     {
-        LOG_I("find pwm err");
+        LOG_E("find pwm device failed");
         return -RT_ERROR;
     }
 #else
-    LOG_D("NO CONFIG RGB_USING_SK6812MINI_HS_PWM_DEV_NAME");
+    LOG_E("NO CONFIG RGB_USING_SK6812MINI_HS_PWM_DEV_NAME");
+    return -RT_ERROR;
 #endif
 
-    //register rgb_device
-    bf0_rgbled_obj[0].rgb_device.parent.control = (rt_err_t (*)(rt_device_t, int, void *))drv_rgbled_control;
-#if  1
-    if (rt_device_register(&bf0_rgbled_obj[0].rgb_device.parent, bf0_rgbled_obj[0].name, RT_DEVICE_FLAG_RDWR))
+    // Register RGB device
+    bf0_rgbled_obj.device.control = (rt_err_t (*)(rt_device_t, int, void *))drv_rgbled_control;
+    bf0_rgbled_obj.device.user_data = &bf0_rgbled_obj;
+
+    if (rt_device_register(&bf0_rgbled_obj.device, bf0_rgbled_obj.name, RT_DEVICE_FLAG_RDWR))
     {
         LOG_E("%s register failed", RGBLED_NAME);
         result = -RT_ERROR;
     }
     else
     {
-        LOG_D("%s register success", RGBLED_NAME);
+        LOG_I("%s register success, supporting %d LEDs", RGBLED_NAME, BSP_RGB_LED_COUNT);
     }
-#endif
 
-__exit:
     return result;
 }
 INIT_COMPONENT_EXPORT(bf0_rgbled_init);
 
-// @} drv_pwm
+// @} drv_rgbled
 // @} bsp_driver
 
-
-#define DRV_TEST
-#ifdef DRV_TEST
-
-#include <finsh.h>
-
-/** @addtogroup bsp_sample BSP driver sample commands.
-  * @{
-  */
-
-/** @defgroup bsp_sample_pwm PWM sample commands
-  * @ingroup bsp_sample
-  * @brief PWM sample commands
-  *
-  * These sample commands demonstrate the usage of pwm driver.
-  * User need to connect a buzzer to PWM output for testing.
-  * @{
-  */
-
-/**
-* @brief rgbled color display device.
-* Usage: pwm_set [device] [channel] [period] [pulse]
-*
-* example: pwm_set pwm3 1 1000000 500
-*/
-
-
-static int rgb_color(int argc, char **argv)
-{
-    int result = 0;
-    struct rt_device_pwm *rgbled_device;
-    /*rgbled poweron*/
-#ifdef SF32LB52X
-    HAL_PMU_ConfigPeriLdo(PMU_PERI_LDO3_3V3, true, true);
-#endif
-    if (argc != 2)
-    {
-        LOG_I("Usage: rgb_color <rgb>");
-        result = -RT_ERROR;
-        goto _exit;
-    }
-    uint32_t color = atoh(argv[2]);
-
-    rgbled_device = (struct rt_device_pwm *)rt_device_find("rgbled");
-    if (!rgbled_device)
-    {
-        result = -RT_EIO;
-        goto _exit;
-    }
-#ifdef SF32LB52X
-    HAL_PIN_Set(PAD_PA32, GPTIM2_CH1, PIN_NOPULL, 1);   // RGB LED 52x
-#elif SF32LB58X
-    HAL_PIN_Set(PAD_PB39, GPTIM3_CH4, PIN_NOPULL, 1);   // RGB LED 58x
-#elif  SF32LB56X
-    HAL_PIN_Set(PAD_PB09, GPTIM3_CH4, PIN_NOPULL, 1);   //RGB LED 56x
-#endif
-    struct rt_rgbled_configuration configuration;
-    configuration.color_rgb = color;
-    rt_device_control(&rgbled_device->parent, PWM_CMD_SET_COLOR, &configuration);
-_exit:
-    return result;
-}
-MSH_CMD_EXPORT(rgb_color, rgb_color 0xffffff);
-
-#endif /* DRV_TEST */
-
-#endif /* RT_USING_PWM */
-
-/// @} bsp_sample_pwm
-
-/// @} bsp_sample
-
+#endif /* RGB_SK6812MINI_HS_ENABLE */
 
 /// @} file
 /************************ (C) COPYRIGHT Sifli Technology *******END OF FILE****/
