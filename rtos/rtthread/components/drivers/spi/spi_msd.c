@@ -664,6 +664,7 @@ static rt_err_t rt_msd_init(rt_device_t dev)
                         /* SD V2.0 or later or SDHC or SDXC memory card! */
                         MSD_DEBUG("[info] Ver2.00 or later or SDHC or SDXC memory card!\r\n");
                         msd->card_type = MSD_CARD_TYPE_SD_V2_X;
+                        break;
                     }
 
                     if ((0xAA == response[4]) && (0x00 == response[3]))
