@@ -619,6 +619,8 @@ static void update_sec_flash(struct sec_configuration *sec_config)
     mpi5_flash_eraser(flash_addr, size);
     mpi5_flash_writer(flash_addr, (const int8_t *)sec_config, sizeof(struct sec_configuration));
 
+    SCB_InvalidateDCache_by_Addr((void *)flash_addr, size);
+    SCB_InvalidateICache_by_Addr((void *)flash_addr, size);
     g_sec_config = (struct sec_configuration *)FLASH_BASE_ADDR;
 }
 
