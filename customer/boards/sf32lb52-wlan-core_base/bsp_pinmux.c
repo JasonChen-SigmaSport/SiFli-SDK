@@ -176,6 +176,25 @@ static void BSP_PIN_Common(void)
     HAL_PIN_Set(PAD_PA12, SD1_DIO2, PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA13, SD1_DIO3, PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA11, GPIO_A11, PIN_PULLUP, 1);
+#ifdef BSP_WIFI_SWT6621
+    HAL_PIN_Set_DS0(PAD_PA14, 1, 1);
+    HAL_PIN_Set_DS1(PAD_PA14, 1, 1);
+
+    HAL_PIN_Set_DS0(PAD_PA15, 1, 1);
+    HAL_PIN_Set_DS1(PAD_PA15, 1, 1);
+
+    HAL_PIN_Set_DS0(PAD_PA16, 1, 1);
+    HAL_PIN_Set_DS1(PAD_PA16, 1, 1);
+
+    HAL_PIN_Set_DS0(PAD_PA17, 1, 1);
+    HAL_PIN_Set_DS1(PAD_PA17, 1, 1);
+
+    HAL_PIN_Set_DS0(PAD_PA12, 1, 1);
+    HAL_PIN_Set_DS1(PAD_PA12, 1, 1);
+
+    HAL_PIN_Set_DS0(PAD_PA13, 1, 1);
+    HAL_PIN_Set_DS1(PAD_PA13, 1, 1);
+#endif /* BSP_WIFI_SWT6621 */
 #elif defined(BSP_ENABLE_MPI2)
     // MPI2
     HAL_PIN_Set(PAD_PA16, MPI2_CLK,  PIN_NOPULL,   1);

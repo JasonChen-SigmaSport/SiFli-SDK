@@ -32,6 +32,13 @@ __WEAK void BSP_PowerUpCustom(bool is_deep_sleep)
 void BSP_Power_Up(bool is_deep_sleep)
 {
     BSP_PowerUpCustom(is_deep_sleep);
+    if (is_deep_sleep)
+    {
+        HAL_PIN_Set(PAD_PA21, GPIO_A21, PIN_NOPULL, 1);
+        HAL_PIN_Set(PAD_PA30, GPIO_A30, PIN_NOPULL, 1);
+        BSP_GPIO_Set(21, 0, 1);//sdio mode
+        BSP_GPIO_Set(30, 1, 1);//wifi power on
+    }
 }
 
 
