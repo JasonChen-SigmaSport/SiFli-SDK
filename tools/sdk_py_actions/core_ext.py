@@ -4,6 +4,7 @@ import fnmatch
 import glob
 import json
 import locale
+import multiprocessing
 import os
 import re
 import shutil
@@ -14,6 +15,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from urllib.error import URLError
 from urllib.request import Request
 from urllib.request import urlopen
@@ -90,6 +92,26 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
         except Exception as e:
             raise FatalError(f'Failed to write .project.toml: {e}')
 
+    def resolve_board_options(project_dir: str, board: Optional[str], board_search_path: Optional[str], require_board: bool=False
+                              ) -> Tuple[Optional[str], Optional[str]]:
+        """Resolve board options using CLI args or fallback to .project.toml."""
+        resolved_board = board
+        resolved_board_search_path = board_search_path
+
+        if resolved_board is None or resolved_board_search_path is None:
+            config = read_project_config(project_dir)
+            if resolved_board is None and config.get('board'):
+                resolved_board = config['board']
+                print(f'Using board from .project.toml: {resolved_board}')
+            if resolved_board_search_path is None and config.get('board_search_path'):
+                resolved_board_search_path = config['board_search_path']
+                print(f'Using board_search_path from .project.toml: {resolved_board_search_path}')
+
+        if require_board and not resolved_board:
+            raise FatalError('Board name is required. Use "--board" or run "sdk.py set-target" to configure it.')
+
+        return resolved_board, resolved_board_search_path
+
     def set_target(target_name: str, ctx: Context, args: PropertyDict, board: str, board_search_path: Optional[str]) -> None:
         """
         Set target board configuration and save to .project.toml file.
@@ -111,21 +133,37 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
         variable.
         """
         project_dir = args.project_dir
-        
-        # Try to read from .project.toml if options are not provided
-        if board is None or board_search_path is None:
-            config = read_project_config(project_dir)
-            if board is None and config['board']:
-                board = config['board']
-                print(f'Using board from .project.toml: {board}')
-            if board_search_path is None and config['board_search_path']:
-                board_search_path = config['board_search_path']
-                print(f'Using board_search_path from .project.toml: {board_search_path}')
+
+        board, board_search_path = resolve_board_options(project_dir, board, board_search_path)
         
         menuconfig_path = os.path.join(os.environ['SIFLI_SDK_PATH'], 'tools', 'kconfig', 'menuconfig.py')
         board_arg = ['--board', board] if board else []
         board_search_path_arg = ['--board_search_path', board_search_path] if board_search_path else []
         subprocess.run([sys.executable, menuconfig_path] + board_arg + board_search_path_arg)
+
+    def build_callback(target_name: str, ctx: Context, args: PropertyDict, board: Optional[str], board_search_path: Optional[str],
+                       jobs: Optional[int]) -> None:
+        """Build project with scons."""
+        project_dir = args.project_dir
+        board, board_search_path = resolve_board_options(project_dir, board, board_search_path, require_board=True)
+
+        if jobs in (None, 0):
+            try:
+                jobs = multiprocessing.cpu_count()
+            except NotImplementedError:
+                jobs = 1
+
+        cmd = ['scons', f'--board={board}']
+        if board_search_path:
+            cmd.append(f'--board_search_path={board_search_path}')
+        cmd.append(f'-j{jobs}')
+
+        try:
+            subprocess.run(cmd, cwd=project_dir, check=True)
+        except subprocess.CalledProcessError as e:
+            raise FatalError(f'scons build failed with exit code {e.returncode}')
+        except FileNotFoundError:
+            raise FatalError('scons executable not found. Please ensure SCons is installed and available in PATH.')
 
     def verbose_callback(ctx: Context, param: List, value: str) -> Optional[str]:
         if not value or ctx.resilient_parsing:
@@ -216,6 +254,23 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
         'global_action_callbacks': [validate_root_options],
     }
 
+    board_options = [
+        {
+            'names': ['--board'],
+            'help': (
+                'board name'),
+            'envvar': 'MENUCONFIG_BOARD',
+            'default': None,
+        },
+        {
+            'names': ['--board_search_path'],
+            'help': (
+                'board search path'),
+            'envvar': 'MENUCONFIG_BOARD_SEARCH_PATH',
+            'default': None,
+        },
+    ]
+
     build_actions = {
         'actions': {
             'set-target': {
@@ -238,19 +293,16 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
             'menuconfig': {
                 'callback': menuconfig,
                 'help': 'Run "menuconfig" project configuration tool.',
-                'options': global_options + [
+                'options': global_options + board_options,
+            },
+            'build': {
+                'callback': build_callback,
+                'help': 'Build project with scons.',
+                'options': global_options + board_options + [
                     {
-                        'names': ['--board'],
-                        'help': (
-                            'board name'),
-                        'envvar': 'MENUCONFIG_BOARD',
-                        'default': None,
-                    },
-                    {
-                        'names': ['--board_search_path'],
-                        'help': (
-                            'board search path'),
-                        'envvar': 'MENUCONFIG_BOARD_SEARCH_PATH',
+                        'names': ['-j', '--jobs'],
+                        'help': 'Number of parallel jobs for scons. Use without value to default to CPU count.',
+                        'type': int,
                         'default': None,
                     },
                 ],
