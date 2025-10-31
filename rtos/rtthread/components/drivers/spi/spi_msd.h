@@ -10,7 +10,9 @@
 
 #ifndef SPI_MSD_H_INCLUDED
 #define SPI_MSD_H_INCLUDED
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdint.h>
 #include <drivers/spi.h>
 
@@ -128,5 +130,10 @@ struct msd_device
 };
 
 extern rt_err_t msd_init(const char *sd_device_name, const char *spi_device_name);
+rt_err_t msd_reinit(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SPI_MSD_H_INCLUDED

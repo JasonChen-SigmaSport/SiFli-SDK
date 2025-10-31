@@ -1937,6 +1937,17 @@ rt_err_t msd_init(const char *sd_device_name, const char *spi_device_name)
 
     return RT_EOK;
 }
+
+rt_err_t msd_reinit(void)
+{
+    if (RT_EOK != rt_msd_init((rt_device_t)&_msd_device))
+    {
+        MSD_DEBUG("[SD] reinit failed\n");
+        return RT_ERROR;
+    }
+    return RT_EOK;
+}
+
 #include "drv_spi.h"
 
 int rt_spi_msd_init(void)
