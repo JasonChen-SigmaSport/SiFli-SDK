@@ -5,11 +5,9 @@ REM echo on
 
 set SIFLI_SDK=%cd%
 
-set ORG_PATH=%PATH%
-set ENV_ROOT=C:\SiFli_Env
-echo %ORG_PATH%
-
 set TOOLS_ROOT=%cd%/tools
+
+call %ENV_ROOT%\tools\ConEmu\ConEmu\CmdInit.cmd
 
 set RTT_EXEC_PATH=C:\GNU MCU Eclipse\ARM Embedded GCC\8.2.1-1.2-20190119-1237\bin
 set RTT_CC=gcc

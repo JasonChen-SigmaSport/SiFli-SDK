@@ -5,9 +5,22 @@ set SIFLI_SDK=%~dp0
 set SIFLI_SDK_PATH=%~dp0
 set PKGS_DIR=%PKGS_ROOT%
 
-if not defined ORG_PATH (
-    echo Please upgrate env to v1.1.2 or greater
+set "ver_check=1.1.3"
+if not defined ENV_VER (
+    echo Please upgrate env to v%ver_check% or greater
     echo set_env FAIL
+    exit /b 1
+)
+
+REM Convert version strings to comparable numbers by removing dots
+set "ver_current=%ENV_VER%"
+
+set "ver_check_num=%ver_check:.=%"
+set "ver_current_num=%ver_current:.=%"
+
+REM Compare versions
+if %ver_current_num% LSS %ver_check_num% (
+    echo Error: Env version v%ENV_VER% is lower than required v%ver_check%
     exit /b 1
 )
 

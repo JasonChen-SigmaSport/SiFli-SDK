@@ -4,7 +4,7 @@ Compared to full script-based environment installation, you might prefer or be m
 
 ## Download SiFli-ENV Tool
 
-The current latest download link for the SiFli-ENV tool is: <https://downloads.sifli.com/sdk/env_1.1.2.zip>.
+The current latest download link for the SiFli-ENV tool is: <https://downloads.sifli.com/tools/env/env_latest.zip>.
 
 If you encounter the prompt `Please upgrade env to v1.1.2 or greater`, it indicates that your ENV version is outdated. Please use the above link to download the latest version of the SiFli-ENV tool.
 
