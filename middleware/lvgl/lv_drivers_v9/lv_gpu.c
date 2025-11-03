@@ -239,9 +239,62 @@ void lv_gpu_adv_log(uint32_t level)
 {
     HAL_EPIC_Adv_Log(level);
 }
-int32_t gpu_ezipa_draw(ezipa_obj_t *obj, const lv_area_t *src_area, const lv_area_t *dst_area, bool next)
+
+#ifdef RT_USING_PM
+    #define GPU_DEVICE_START()   rt_pm_hw_device_start()
+    #define GPU_DEVICE_STOP()     rt_pm_hw_device_stop()
+#else
+    #define GPU_DEVICE_START()
+    #define GPU_DEVICE_STOP()
+#endif  /* RT_USING_PM */
+
+int32_t gpu_ezipa_draw(ezipa_obj_t *obj, const lv_area_t *src_area, const lv_layer_t *layer, bool next)
 {
-    return 0;
+    int32_t r;
+
+    const lv_area_t *dst_area = &layer->_clip_area;
+    lv_draw_buf_t *buf_act = layer->draw_buf;
+    const lv_area_t *disp_area = &layer->buf_area;
+
+    // my_gpu_wait(draw_ctx);
+    drv_epic_wait_done();
+
+    ezipa_canvas_t canvas;
+    canvas.width  = buf_act->header.w;
+    canvas.height = buf_act->header.h;
+    canvas.buf    = buf_act->data;
+
+#if(16 == LV_COLOR_DEPTH)
+    canvas.color_fmt =       EPIC_OUTPUT_RGB565;
+#elif (24 == LV_COLOR_DEPTH)
+    canvas.color_fmt =       EPIC_OUTPUT_RGB888;
+#else
+#error "Unsupport format!"
+#endif
+
+    canvas.x_offset = src_area->x1 - disp_area->x1;
+    canvas.y_offset = src_area->y1 - disp_area->y1;
+
+    canvas.mask_x_offset = dst_area->x1 - disp_area->x1;
+    canvas.mask_y_offset = dst_area->y1 - disp_area->y1;
+    canvas.mask_width  = lv_area_get_width(dst_area);
+    canvas.mask_height = lv_area_get_height(dst_area);
+
+    //gpu_lock(DRV_EPIC_COLOR_BLEND, &src2, &src1, &output, NULL);
+
+    GPU_DEVICE_START();
+
+    r = ezipa_draw(obj, &canvas, next);
+    RT_ASSERT(0 == r);
+
+    GPU_DEVICE_STOP();
+
+    //gpu_unlock();
+
+    // my_gpu_wait(draw_ctx);
+    drv_epic_wait_done();
+
+    return r;
 }
 
 #endif /* USING_EAZIP_DEC */

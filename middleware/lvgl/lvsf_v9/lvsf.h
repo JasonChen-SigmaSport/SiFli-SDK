@@ -13,7 +13,7 @@ extern "C" {
 #include "lvgl.h"
 #include "lv_ex_data.h"
 #include "lvsf_input.h"
-
+#include "lvsf_ezipa.h"
 
 #include "lv_ext_resource_manager.h"
 

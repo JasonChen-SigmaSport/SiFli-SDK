@@ -39,7 +39,7 @@ static void lv_ezipa_event(const lv_obj_class_t *class_p, lv_event_t *e);
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
-extern int32_t gpu_ezipa_draw(ezipa_obj_t *obj, const lv_area_t *src_area, const lv_area_t *dst_area, bool next, bool base_map);
+extern int32_t gpu_ezipa_draw(ezipa_obj_t *obj, const lv_area_t *src_area, const lv_layer_t *layer, bool next);
 
 const lv_obj_class_t lv_ezipa_class =
 {
@@ -391,7 +391,7 @@ static void lv_ezipa_event(const lv_obj_class_t *class_p, lv_event_t *e)
             //ignore delay time;
             if (ext->delay_play_time)
             {
-                if (ext->delay_play_num * ext->anim.time < ext->delay_play_time)
+                if (ext->delay_play_num * ext->anim.duration < ext->delay_play_time)
                 {
                     ext->delay_play_num++;
                     /*Start next frame update timer*/
@@ -405,7 +405,11 @@ static void lv_ezipa_event(const lv_obj_class_t *class_p, lv_event_t *e)
                     lv_img_set_src(ext->surface, &ext->img_dsc);
                 }
             }
-            r = gpu_ezipa_draw(ext->ezipa_dec, &ezipa->coords, clip_area, (LV_EZIPA_NEXT == ext->status), true);
+#ifndef DISABLE_LVGL_V8
+            r = gpu_ezipa_draw(ext->ezipa_dec, &ezipa->coords, clip_area, (LV_EZIPA_NEXT == ext->status));
+#else
+            r = gpu_ezipa_draw(ext->ezipa_dec, &ezipa->coords, layer, (LV_EZIPA_NEXT == ext->status));
+#endif
             ext->img_dsc.data = ext->ezipa_dec->output_buf;
             if (LV_EZIPA_NEXT == ext->status)
             {

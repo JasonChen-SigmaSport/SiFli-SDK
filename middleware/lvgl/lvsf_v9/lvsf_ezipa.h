@@ -14,6 +14,7 @@ extern "C" {
 /*********************
  *      INCLUDES
  *********************/
+#include "string.h"
 #include "rtconfig.h"
 #include "lvgl.h"
 
