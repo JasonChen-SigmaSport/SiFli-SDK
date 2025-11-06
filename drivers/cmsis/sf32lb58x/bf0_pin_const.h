@@ -1296,6 +1296,16 @@ typedef enum
     EXT_S_RX_FLAG,
     /** ANA_PIN_FUNC */
     ANA_PIN_FUNC,
+    /** PBR_PWR_REQ */
+    PBR_PWR_REQ,
+    /** PBR_GPO */
+    PBR_GPO,
+    /** PBR_CLK_LP */
+    PBR_CLK_LP,
+    /** PBR_LPTIM3_OUT */
+    PBR_LPTIM3_OUT,
+    /** PBR_LPTIM3_INV_OUT */
+    PBR_LPTIM3_INV_OUT,
     PIN_FUNC_MAX,
 } pin_function;
 

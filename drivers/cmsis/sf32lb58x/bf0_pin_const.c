@@ -1066,4 +1066,10 @@ const unsigned short pin_pad_func_lcpu[][16] =
     {GPIO_B57,  0,  USART4_RTS, SPI3_DO,    SPI3_DIO,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
     {GPIO_B58,  0,  USART6_RXD, SPI3_DI,    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
     {GPIO_B59,  0,  USART6_TXD, SPI3_CS,    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {PBR_PWR_REQ, PBR_GPO,  PBR_LPTIM3_OUT,  PBR_LPTIM3_INV_OUT,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {PBR_GPO, PBR_CLK_LP,  PBR_LPTIM3_OUT,  PBR_LPTIM3_INV_OUT,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {PBR_GPO, PBR_CLK_LP,  PBR_LPTIM3_OUT,  PBR_LPTIM3_INV_OUT,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {PBR_GPO, PBR_CLK_LP,  PBR_LPTIM3_OUT,  PBR_LPTIM3_INV_OUT,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {PBR_GPO, PBR_CLK_LP,  PBR_LPTIM3_OUT,  PBR_LPTIM3_INV_OUT,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {PBR_GPO, PBR_CLK_LP,  PBR_LPTIM3_OUT,  PBR_LPTIM3_INV_OUT,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
 };
