@@ -158,30 +158,38 @@ If the log analysis cannot pinpoint the crash issue, the Ozone debugging tool pr
 > Ozone can also be used in cases where the board is not crashed and can be attached for step-by-step debugging, similar to Keil, although its stack analysis seems to be less effective.
 
 - Create a new project, select the appropriate Device driver (Cortex-M33), choose the Register Set as Cortex-M33 (with FPU), and the peripheral SVD file (select based on the chip model, the path is in _$SDK_ROOT/tools/svd_external)
+
 ![Ozone Debug Step 1](../../assets/Ozone_debug_Step1.png)
 
 - Select the connection method for JLink, using SWD interface.
+
 ![Ozone Debug Step 2](../../assets/Ozone_debug_Step2.png)
 
 - Choose the ELF file for flashing and read the symbol information.
+
 ![Ozone Debug Step 3](../../assets/Ozone_debug_Step3.png)
 
 - Once the project is set up, attach Ozone to the crashed board via JLink and halt the board.
+
 ![Ozone Debug Step 4](../../assets/Ozone_debug_Step4.png)
 
 - Now you can perform step-by-step debugging, variable inspection, stack analysis, etc., similar to Keil.
+
 ![Ozone Debug Step 5](../../assets/Ozone_debug_Step5.png)
 
 ##### Configure using serial port connection method
 - Create a new project, select the appropriate Device driver (Cortex-M33), choose the Register Set as Cortex-M33 (with FPU), and the peripheral SVD file (select based on the chip model, the path is $_SDK_ROOT/tools/svd_external)
 
 - Open _SifliUsartServer.exe_ and click on "Connect". Pay attention to the selected core for debugging and the corresponding serial port number for that core.
+
 ![](../../assets/UsartServer.png)
 
 - Next, OZone selects the connection method for UART, Host Interface is set to IP, and IP Address is filled with SERVER of UartServer.
+
 ![](../../assets/Ozone_uart_debug_Step1.png)
 
 - Select the ELF file for the burning program and read the symbol information
+
 ![](../../assets/Ozone_debug_Step3.png)
 
 ## 3. Log Interface

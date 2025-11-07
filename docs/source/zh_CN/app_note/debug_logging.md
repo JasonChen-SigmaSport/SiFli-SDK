@@ -152,30 +152,38 @@ fatal error on thread: app_watc?
 
 > Ozone 在板子没有死机的情况下，也可以通过以下方法Attach上去，并单步调试，类似Keil的功能。但是它的栈解析好像不如Keil的好。
 - 新建一个工程，选择适当的Device驱动(Cortex-M33), Register Set选择Cortex-M33 (with FPU), 以及外设SVD文件(根据芯片型号选择，路径在_$SDK_ROOT/tools/svd_external)
+
 ![](../../assets/Ozone_debug_Step1.png)
 
 - 下一步选择Jlink的连接方式，SWD接口
+
 ![](../../assets/Ozone_debug_Step2.png)
 
 - 选择烧录程序的ELF文件，读取符号信息
+
 ![](../../assets/Ozone_debug_Step3.png)
 
 - 工程建立完毕，然后将Ozone 通过Jlink Attach到死机的板子并且Halt住板子
+
 ![](../../assets/Ozone_debug_Step4.png)
 
 - 然后就可以通过菜单里面的功能，单步调试、变量查看、栈解析等操作，跟Keil类似。
+
 ![](../../assets/Ozone_debug_Step5.png)
 
 ##### 使用串口连接方式配置
 - 新建一个工程，选择适当的Device驱动(Cortex-M33),  Register Set选择Cortex-M33 (with FPU), 以及外设SVD文件(根据芯片型号选择，路径为_$SDK_ROOT/tools/svd_external)
 
 - 打开_SifliUsartServer.exe_ 并点击连接，注意所需要调试的核心选择及核心对应的串口号
+
 ![](../../assets/UsartServer.png)
 
 - 下一步OZone选择UART的连接方式，Host Interface选择IP, IP Address填写UartServer的SERVER
+
 ![](../../assets/Ozone_uart_debug_Step1.png)
 
 - 选择烧录程序的ELF文件，读取符号信息
+
 ![](../../assets/Ozone_debug_Step3.png)
 
 
