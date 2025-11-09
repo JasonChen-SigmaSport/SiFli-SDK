@@ -281,7 +281,7 @@
 //================= HP subsys ROM =================
 // Size
 #define HCPU_CODE_SIZE                  (HPSYS_ROM_SIZE)
-#define HCPU_RO_DATA_SIZE               (16*1024)
+#define HCPU_RO_DATA_SIZE               (19*1024)
 #define HCPU_RAM_DATA_SIZE              (HPSYS_RAM_SIZE - HCPU_RO_DATA_SIZE - HPSYS_MBOX_BUF_SIZE)
 #define HCPU_CODE_START_ADDR            0 //(BOOTLOADER_CODE_END_ADDR+1)
 #define HCPU_CODE_END_ADDR              (END_ADDR(HCPU_CODE_START_ADDR, HCPU_CODE_SIZE))
