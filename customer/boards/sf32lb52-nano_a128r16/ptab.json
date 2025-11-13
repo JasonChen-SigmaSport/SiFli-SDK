@@ -40,7 +40,9 @@
             {
                 "offset": "0x000A0000", 
                 "max_size": "0x00400000", 
-                "tags": [], 
+                "tags": [
+                    "HCPU_FLASH_CODE"
+                ], 
                 "ftab": {
                     "name": "main", 
                     "address": [
@@ -146,7 +148,7 @@
                 "offset": "0x00000000", 
                 "max_size": "0x00400000", 
                 "tags": [
-                    "HCPU_FLASH_CODE"
+                    "HCPU_PSRAM_CODE"
                 ], 
                 "exec": "main"
             },
