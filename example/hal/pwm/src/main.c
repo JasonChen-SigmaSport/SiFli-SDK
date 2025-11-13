@@ -115,7 +115,7 @@ void ATIM1_Modify_Param(unsigned int frequency, unsigned int percentage1, unsign
 void ATIM1_Init(void)
 {
     rt_kprintf("ATIM1_Init\n");
-#if defined(BSP_USING_BOARD_SF32LB52_LCD_N16R8)
+#if defined(BSP_USING_BOARD_SF32LB52_LCD_N16R8)|| (BSP_USING_BOARD_SF32LB52_NANO_A128R16) || (BSP_USING_BOARD_SF32LB52_NANO_N16R16)
     atim_Handle.Instance = (GPT_TypeDef *)hwp_atim1;
 #elif defined (BSP_USING_BOARD_SF32LB58_LCD_N16R64N4)
     atim_Handle.Instance = (GPT_TypeDef *)hwp_atim2;
@@ -204,7 +204,7 @@ typedef struct
     unsigned int pulse;   /* unit:ns (pulse<=period) */
     unsigned int deadtime; /*dead time from 0 to 1023*/
 } T_haltest_pwm_cfg;
-#if defined(BSP_USING_BOARD_SF32LB52_LCD_N16R8)
+#if defined(BSP_USING_BOARD_SF32LB52_LCD_N16R8) || (BSP_USING_BOARD_SF32LB52_NANO_A128R16) || (BSP_USING_BOARD_SF32LB52_NANO_N16R16)
 
 T_haltest_pwm_cfg testcfg[] =
 {
@@ -425,7 +425,7 @@ int main(void)
     rt_kprintf("Start atimer pwm demo!\n");
     /* configure pinmux */
 
-#if defined(BSP_USING_BOARD_SF32LB52_LCD_N16R8)
+#if defined(BSP_USING_BOARD_SF32LB52_LCD_N16R8) || (BSP_USING_BOARD_SF32LB52_NANO_A128R16) || (BSP_USING_BOARD_SF32LB52_NANO_N16R16)
     HAL_PIN_Set(PAD_PA00, ATIM1_CH1,  PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA02, ATIM1_CH1N, PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA03, ATIM1_CH2,  PIN_PULLUP, 1);
