@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <ipc_os_port.h>
 #include "bf0_hal.h"
 #include "ipc_queue.h"
 #include "ipc_hw.h"
