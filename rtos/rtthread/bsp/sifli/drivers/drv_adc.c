@@ -68,6 +68,7 @@ struct sifli_adc
 #define ADC_SML_RANGE_VOL1           (300)
 #define ADC_SML_RANGE_VOL2           (800)
 
+
 #define ADC_RATIO_ACCURATE          (1000)
 
 static struct sifli_adc sifli_adc_obj[sizeof(adc_config) / sizeof(adc_config[0])];
@@ -245,6 +246,7 @@ static rt_err_t sifli_adc_use_gptime_init()
 
     hw_gptimer.time_device.info = &hwtimer_info;
 
+
     if ((1000000 <= hw_gptimer.time_device.info->maxfreq) && (1000000 >= hw_gptimer.time_device.info->minfreq))
     {
         hw_gptimer.time_device.freq = 1000000;
@@ -256,6 +258,7 @@ static rt_err_t sifli_adc_use_gptime_init()
     hw_gptimer.time_device.mode = HWTIMER_MODE_PERIOD;
     hw_gptimer.time_device.cycles = 0;
     hw_gptimer.time_device.overflow = 0;
+
 
     uint32_t  prescaler_value = HAL_RCC_GetPCLKFreq(
                                     hw_gptimer.core,
@@ -299,6 +302,7 @@ static rt_err_t sifli_adc_use_gptime_init()
     __HAL_GPT_SET_PRESCALER(&tim,  val - 1);
     tim.Instance->EGR |= GPT_EVENTSOURCE_UPDATE; /* Update frequency value */
     hw_gptimer.time_device.freq = 1000000;
+
 
     rt_hwtimerval_t t_value;
     t_value.sec = 0;
@@ -401,7 +405,6 @@ int sifli_adc_calibration(uint32_t value1, uint32_t value2,
     float gap1, gap2;
     uint32_t reg_max;
 
-
     if (offset == NULL || ratio == NULL)
         return 0;
 
@@ -439,6 +442,7 @@ static void sifli_adc_vbat_fact_calib(uint32_t voltage, uint32_t reg)
     vol_from_reg = (reg - adc_vol_offset) * adc_vol_ratio / ADC_RATIO_ACCURATE;
     adc_vbat_factor = (float)voltage / vol_from_reg;
 }
+
 
 static rt_err_t sifli_adc_enabled(struct rt_adc_device *device, rt_uint32_t channel, rt_bool_t enabled)
 {
@@ -629,6 +633,7 @@ static rt_err_t sifli_get_adc_value(struct rt_adc_device *device, rt_uint32_t ch
 
 #endif
 
+
 #ifndef SF32LB52X   // TODO: remove macro check after 52x ADC calibration work
     float fval = sifli_adc_get_float_mv(fave) * 10; // mv to 0.1mv based
     *value = (rt_uint32_t)fval;
@@ -763,14 +768,9 @@ static rt_err_t sifli_adc_control(struct rt_adc_device *device, rt_uint32_t cmd,
 
     /* get ADC value */
     data = (rt_uint32_t)HAL_ADC_GetValue(sifli_adc_handler, channel);
-
     if (data >= adc_thd_reg)
     {
-        HAL_ADC_Stop(sifli_adc_handler);
-        LOG_E("ADC input voltage too large, register value %d\n", data);
-        r = rt_sem_release(&gpadc_lock);
-        read_arg->value = 50000; // output 5v as invalid voltage !
-        return RT_ERROR;
+        data = adc_thd_reg - 1; // if more than adc_the_reg, use adc_the_reg -1; to avoid adc key miss press
     }
 
     HAL_ADC_Stop(sifli_adc_handler);
@@ -866,6 +866,7 @@ static int sifli_adc_init(void)
             HAL_ADC_SetFreq(&sifli_adc_obj[i].ADC_Handler, adc_freq);
 #endif
 
+
 #ifdef BSP_GPADC_SUPPORT_MULTI_CH_SAMPLING
             {
                 ADC_ChannelConfTypeDef ADC_ChanConf;
@@ -914,6 +915,7 @@ static int sifli_adc_init(void)
 
     // set default adc thd to register max value
     adc_thd_reg = GPADC_ADC_RDATA0_SLOT0_RDATA >> GPADC_ADC_RDATA0_SLOT0_RDATA_Pos;
+
 
     FACTORY_CFG_ADC_T cfg;
     int len = sizeof(FACTORY_CFG_ADC_T);
@@ -1013,6 +1015,7 @@ static int sifli_adc_pm_register(void)
 INIT_ENV_EXPORT(sifli_adc_pm_register);
 
 #endif  /* RT_USING_PM */
+
 
 #ifdef RT_USING_FINSH
 //#define DRV_GPADC_TEST
@@ -1599,7 +1602,6 @@ FINSH_FUNCTION_EXPORT_ALIAS(cmd_gpadc, __cmd_gpadc, Test gpadc driver);
 #endif /* finsh */
 
 #endif /* BSP_USING_ADC */
-
 /// @} drv_lcpu
 /// @} bsp_driver
 
