@@ -58,6 +58,8 @@
 
 /* Choose one HID type. */
 #define HID_KEYBOARD
+#define ADV_USING_MS_SWIFT_PAIR_BEACON
+//#define ADV_USING_MS_SWIFT_PAIR_BEACON_NAME
 // #define HID_CONSUMER
 
 #define HIDS_TEST
@@ -368,6 +370,7 @@ uint8_t *ble_hids_gatts_get_cbk(uint8_t conn_idx, uint8_t idx, uint16_t *len)
     {
         ret_val = (uint8_t *)&input;
         *len = sizeof(input);
+        break;
     }
     default:
         break;
@@ -380,7 +383,7 @@ uint8_t ble_hids_gatts_set_cbk(uint8_t conn_idx, sibles_set_cbk_t *para)
 {
     app_env_t *env = ble_app_get_env();
 
-    LOG_I("HIDS get: idx=%d\n", para->idx);
+    LOG_I("HIDS set: idx=%d\n", para->idx);
     switch (para->idx)
     {
     case HIDS_IDX_REPORT_NTF_CFG:
@@ -520,16 +523,15 @@ static int hid_consume_state_key_clear_bit(uint8_t key)
 void key_report_send(uint8_t *key_val, uint16_t key_val_len)
 {
     app_env_t *env = ble_app_get_env();
-    if (env->data.is_config_on)
-    {
-        sibles_value_t value;
-        value.hdl = env->data.srv_handle;
-        value.idx = HIDS_IDX_REPORT_VAL;
-        value.len = key_val_len;
-        value.value = key_val;
-        sibles_write_value(env->conn_idx, &value);
-        LOG_I("key_report_send: sibles_write_value called");
-    }
+
+    // can not check cccd because hid only write cccd when first pair
+    sibles_value_t value;
+    value.hdl = env->data.srv_handle;
+    value.idx = HIDS_IDX_REPORT_VAL;
+    value.len = key_val_len;
+    value.value = key_val;
+    sibles_write_value(env->conn_idx, &value);
+    LOG_I("key_report_send: sibles_write_value called");
 }
 
 
@@ -639,8 +641,16 @@ static uint8_t ble_app_advertising_event(uint8_t event, void *context, void *dat
     return 0;
 }
 
+uint8_t sibles_advertising_disc_mode_get()
+{
+    return GAPM_ADV_MODE_GEN_DISC;
+}
 
-#define DEFAULT_LOCAL_NAME "SIFLI_APP"
+#ifdef HID_KEYBOARD
+    #define DEFAULT_LOCAL_NAME "SF_KEYBOARD"
+#else
+    #define DEFAULT_LOCAL_NAME "SIFLI_HID"
+#endif
 /* Enable advertise via advertising service. */
 static void ble_app_advertising_start(void)
 {
@@ -648,14 +658,23 @@ static void ble_app_advertising_start(void)
     uint8_t ret;
 
     char local_name[31] = {0};
+    char short_name[31] = {0};
+#ifdef ADV_USING_MS_SWIFT_PAIR_BEACON
+    uint8_t manu_additnal_data[] = {0x03, 0x00, 0x80};
+    // Microsoft
+    uint16_t manu_company_id = 0x06;
+#else
     uint8_t manu_additnal_data[] = {0x20, 0xC4, 0x00, 0x91};
-    uint16_t manu_company_id = 0x01;
+    uint16_t manu_company_id = SIG_SIFLI_COMPANY_ID;
+#endif
     bd_addr_t addr;
     ret = ble_get_public_address(&addr);
     if (ret == HL_ERR_NO_ERROR)
         rt_snprintf(local_name, 31, "SIFLI_APP-%x-%x-%x-%x-%x-%x", addr.addr[0], addr.addr[1], addr.addr[2], addr.addr[3], addr.addr[4], addr.addr[5]);
     else
         memcpy(local_name, DEFAULT_LOCAL_NAME, sizeof(DEFAULT_LOCAL_NAME));
+
+    memcpy(short_name, DEFAULT_LOCAL_NAME, sizeof(DEFAULT_LOCAL_NAME));
 
     ble_gap_dev_name_t *dev_name = malloc(sizeof(ble_gap_dev_name_t) + strlen(local_name));
     dev_name->len = strlen(local_name);
@@ -674,10 +693,20 @@ static void ble_app_advertising_start(void)
     /* Scan rsp data is same as advertising data. */
     //para.config.is_rsp_data_duplicate = 1;
 
+#if defined(ADV_USING_MS_SWIFT_PAIR_BEACON) && (ADV_USING_MS_SWIFT_PAIR_BEACON_NAME)
+    para.rsp_data.completed_name = rt_malloc(rt_strlen(short_name) + sizeof(sibles_adv_type_name_t));
+    para.rsp_data.completed_name->name_len = rt_strlen(short_name);
+    rt_memcpy(para.rsp_data.completed_name->name, short_name, para.rsp_data.completed_name->name_len);
+
+    para.adv_data.shortened_name = rt_malloc(rt_strlen(short_name) + sizeof(sibles_adv_type_name_t));
+    para.adv_data.shortened_name->name_len = rt_strlen(short_name);
+    rt_memcpy(para.adv_data.shortened_name->name, short_name, para.adv_data.shortened_name->name_len);
+#else
     /* Prepare name filed. Due to name is too long to put adv data, put it to rsp data.*/
     para.rsp_data.completed_name = rt_malloc(rt_strlen(local_name) + sizeof(sibles_adv_type_name_t));
     para.rsp_data.completed_name->name_len = rt_strlen(local_name);
     rt_memcpy(para.rsp_data.completed_name->name, local_name, para.rsp_data.completed_name->name_len);
+#endif
 
     /* Prepare service data filed .*/
     {
@@ -699,9 +728,6 @@ static void ble_app_advertising_start(void)
 #endif
     memcpy(para.adv_data.appearance, &appearance, 2);
 
-    // set ad type flag
-    para.adv_data.disc_mode = GAPM_ADV_MODE_GEN_DISC;
-
     /* Prepare manufacturer filed .*/
     para.adv_data.manufacturer_data = rt_malloc(sizeof(sibles_adv_type_manufacturer_data_t) + sizeof(manu_additnal_data));
     para.adv_data.manufacturer_data->company_id = manu_company_id;
@@ -717,6 +743,9 @@ static void ble_app_advertising_start(void)
     }
     rt_free(para.rsp_data.appearance);
     rt_free(para.rsp_data.completed_name);
+#if defined(ADV_USING_MS_SWIFT_PAIR_BEACON) && (ADV_USING_MS_SWIFT_PAIR_BEACON_NAME)
+    rt_free(para.adv_data.shortened_name);
+#endif
     rt_free(para.adv_data.manufacturer_data);
 }
 
