@@ -54,12 +54,23 @@ if RT_USING_DFS
             bool "Using RT_DFS_ELM_WORD_ACCESS"
             default y
 
+        config RT_DFS_ELM_USE_EXFAT
+            bool "Enable exFAT file system support"
+            default n
+
+        if RT_DFS_ELM_USE_EXFAT
+            config RT_DFS_ELM_EXFAT_THRESHOLD_GB
+                int "Threshold size to determine exFAT file system (in GB)"
+                default 10
+        endif
+
         choice
             prompt "Support long file name"
             default RT_DFS_ELM_USE_LFN_3
 
             config RT_DFS_ELM_USE_LFN_0
                 bool "0: LFN disable"
+                depends on !RT_DFS_ELM_USE_EXFAT
 
             config RT_DFS_ELM_USE_LFN_1
                 bool "1: LFN with static LFN working buffer"

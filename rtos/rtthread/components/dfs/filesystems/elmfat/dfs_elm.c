@@ -289,7 +289,31 @@ int dfs_elm_mkfs(rt_device_t dev_id)
     /* [-]  Working buffer */
     /* [IN] Size of working buffer */
     memset(&opt, 0, sizeof(opt));
-    opt.fmt = FM_ANY | FM_SFD;
+#ifdef RT_DFS_ELM_USE_EXFAT
+    struct rt_device_blk_geometry geo = {0};
+    if (rt_device_control(dev_id, RT_DEVICE_CTRL_BLK_GETGEOME, &geo) == RT_EOK &&
+            geo.bytes_per_sector && geo.sector_count)
+    {
+        rt_uint32_t bytes = (rt_uint32_t)geo.sector_count;
+
+        if (bytes >= ((RT_DFS_ELM_EXFAT_THRESHOLD_GB * 1024ULL * 1024ULL * 1024ULL) / geo.bytes_per_sector))//>= Threashold GB
+        {
+            rt_kprintf("Use exFAT format\n");
+            opt.fmt    = FM_EXFAT;
+            opt.n_fat  = 1;
+            opt.au_size = 0;
+        }
+        else
+
+        {
+            opt.fmt    = FM_ANY | FM_SFD;
+        }
+    }
+    else
+#endif
+    {
+        opt.fmt    = FM_ANY | FM_SFD;
+    }
     result = f_mkfs(logic_nbr, &opt, work, FF_MAX_SS);
     rt_free(work);
     work = RT_NULL;
