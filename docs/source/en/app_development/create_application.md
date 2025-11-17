@@ -1,7 +1,7 @@
 
 # Creating an Application
 
-The fastest way to create an application is to copy an existing example. Below, we will explain how to create a new application based on the `hello_world` example.
+The fastest way to create an application is to copy an existing example. Below, we will explain how to create a new application based on the `hello_world` example.Here, the Windows platform is used as an example; the approaches for macOS and Linux are analogous.
 
 ## Copy the Example
 
@@ -27,12 +27,13 @@ The fastest way to create an application is to copy an existing example. Below, 
             SConscript
     ```
 
-2. Open the Env command line window: Right-click on the SDK root directory and open the Env command line window, then run `set_env gcc` to set the environment parameters.
-3. Change to the project directory: `cd c:\work\ws\hello_world\project` to switch to the copied example project directory.
-4. Compile: `scons --board=sf32lb52-lcd_n16r8 -j8`. The selected board is `sf32lb52-lcd_n16r8`, refer to [supported_boards/index.md](../supported_boards/index.md).
+2. Open the PowerShell command line window: Press the Win key or click the Windows icon on the lower left corner, type "powershell", and then open the PowerShell terminal.
+3. Set environment variables: `cd c:\OpenSiFli\SiFli-SDK` to switch to the root directory of the SDK, and then enter `.\export.ps1`.The path used here is just an example. The actual path should be based on the user's local directory.
+4. Change to the project directory: `cd c:\work\ws\hello_world\project` to switch to the copied example project directory.
+5. Compile: `scons --board=sf32lb52-lcd_n16r8 -j8`. The selected board is `sf32lb52-lcd_n16r8`, refer to [supported_boards/index.md](../supported_boards/index.md).
     
     ![Alt text](../../assets/create_app_and_build.png)`
-5. Flash: `build_sf32lb52-lcd_n16r8_hcpu\uart_download`.
+6. Flash: `build_sf32lb52-lcd_n16r8_hcpu\uart_download`.
 
 At this point, a new `hello_world` program has been created, and the compilation and flashing methods for the new project are identical to those of the SDK’s built-in examples.
 

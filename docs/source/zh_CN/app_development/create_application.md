@@ -1,5 +1,5 @@
 # 创建应用程序
-创建一个应用程序最快捷的方法是复制一份已有的示例，下面以hello_world例程为例，说明如何基于该示例创建一个新的应用程序
+创建一个应用程序最快捷的方法是复制一份已有的示例，下面以hello_world例程为例，说明如何基于该示例创建一个新的应用程序。这里以windows平台为例，macOS和Linux的方法类似。
 
 ## 拷贝例程
 1. 拷贝示例：将`example/get-started/hello_world/rtt`拷贝到任意目录，比如`c:\work\ws\hello_world`，
@@ -27,12 +27,13 @@
 
 
 
-1. 打开Env命令行窗口：在SDK根目录右键菜单打开Env命令行窗口，运行`set_env gcc`设置环境参数
-1. 进入到工程目录：`cd c:\work\ws\hello_world\project`切换路径到拷贝的示例工程目录
-1. 编译：`scons --board=sf32lb52-lcd_n16r8 -j8`，这里选择的板子为`sf32lb52-lcd_n16r8`，参考[](/supported_boards/index.md)
+2. 打开PowerShell命令行窗口：按Win键或点击左下角Windows图标，输入powershell，然后打开PowerShell终端
+3. 设置环境变量：`cd c:\OpenSiFli\SiFli-SDK`切换到SDK的根目录,并输入`.\export.ps1`。这里使用的路径只是示例，实际以用户本地路径为准
+4. 进入到工程目录：`cd c:\work\ws\hello_world\project`切换路径到拷贝的示例工程目录
+5. 编译：`scons --board=sf32lb52-lcd_n16r8 -j8`，这里选择的板子为`sf32lb52-lcd_n16r8`，参考[](/supported_boards/index.md)
     ```{image} ../../assets/create_app_and_build.png
     ```
-1. 烧写：`build_sf32lb52-lcd_n16r8_hcpu\uart_download`    
+6. 烧写：`build_sf32lb52-lcd_n16r8_hcpu\uart_download`    
 
 至此，一个新的hello_world程序已经创建完成，新工程的编译、烧写方法与SDK自带例程完全相同。
 
