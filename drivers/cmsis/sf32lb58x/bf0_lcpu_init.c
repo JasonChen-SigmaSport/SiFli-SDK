@@ -67,12 +67,6 @@ void lcpu_rom_config_default(void)
         HAL_LCPU_CONFIG_set(HAL_LCPU_CONFIG_BT_CONFIG, &config, sizeof(config));
     }
 
-    {
-        hal_lcpu_bluetooth_actmove_config_t act_cfg;
-        act_cfg.bit_valid = 1;
-        act_cfg.act_mov = 0x10;
-        HAL_LCPU_CONFIG_set(HAL_LCPU_CONFIG_BT_ACTMOVE_CONFIG, &act_cfg, LCPU_CONFIG_BT_ACTMOVE_ROM_LENGTH);
-    }
 }
 #endif // LCPU_CONFIG_V2
 __WEAK void lcpu_rom_config(void)
