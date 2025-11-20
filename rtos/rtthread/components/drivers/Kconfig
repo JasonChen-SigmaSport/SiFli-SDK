@@ -235,6 +235,11 @@ config RT_USING_SPI
             bool "Using SD/TF card driver with spi"
             select RT_USING_DFS
             default n
+            if RT_USING_SPI_MSD
+                config MSD_SPI_TF_INSERT_DETE_PIN
+                int "Hot swappable pins of TF card"
+                default -1 
+            endif
 
         config MSD_SPI_BUS_NAME
             string "SPI bus name for MSD driver"
@@ -247,7 +252,7 @@ config RT_USING_SPI
             depends on RT_USING_SPI_MSD
             bool "Force SPI TF enter idle after read/write"
             default n
-             
+
         config RT_USING_SFUD
             bool "Using Serial Flash Universal Driver"
             default n

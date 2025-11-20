@@ -1965,6 +1965,21 @@ int rt_spi_msd_init(void)
             return RT_ERROR;
         }
     }
+
+#if defined(MSD_SPI_TF_INSERT_DETE_PIN) && (MSD_SPI_TF_INSERT_DETE_PIN != -1)
+    rt_pin_mode(MSD_SPI_TF_INSERT_DETE_PIN, PIN_MODE_INPUT);
+    int card_state = rt_pin_read(MSD_SPI_TF_INSERT_DETE_PIN);
+    rt_thread_mdelay(10);
+    if (card_state == rt_pin_read(MSD_SPI_TF_INSERT_DETE_PIN))
+    {
+        if (card_state)
+        {
+            rt_kprintf("[SD] no card (pin %d), skip msd_init\n", MSD_SPI_TF_INSERT_DETE_PIN);
+            return RT_EOK;
+        }
+    }
+#endif /* MSD_SPI_TF_INSERT_DETE_PIN */
+
     rt_device_t spi_dev = rt_device_find("sdcard");
     if (rt_device_open(spi_dev,  RT_DEVICE_FLAG_DMA_RX | RT_DEVICE_FLAG_DMA_TX | RT_DEVICE_FLAG_RDWR) != RT_EOK)
         rt_kprintf("[SD] OPEN %s FAIL !\n", MSD_SPI_BUS_NAME);
