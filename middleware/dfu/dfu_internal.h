@@ -87,6 +87,7 @@
 #define DFU_INTERVAL_SLOW 20
 #define DFU_OTA_VERSION_LEN_MAX 32
 #define DFU_HASH_VERIFY_WDT_PET_FREQUENCY 20
+#define DFU_DOWNLOAD_FREQUENCY 10
 
 #define DFU_EMMC_ADDR_RANGE 0xA0000000
 #define DFU_EMMC_ADDR_RANGE_FLAG 0xF0000000
@@ -513,6 +514,8 @@ typedef struct
     uint8_t is_sync_timer_on;
 
     uint8_t flash_erase_state;
+    uint8_t remote_version;
+    uint8_t rsp_frequency;
 
     uint8_t resume_async;
     uint8_t resume_status;

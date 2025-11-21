@@ -91,6 +91,8 @@ static fdb_kvdb_t p_dfu_db = &g_dfu_db;
 #endif /* (FDB_KV_CACHE_TABLE_SIZE == 1) */
 DFU_NON_RET_SECT_END
 
+OS_SEM_DECLAR(g_dfu_ctrl_sem);
+
 
 static rt_thread_t ble_dfu_package_flash_thread_start();
 
@@ -278,6 +280,16 @@ static void dfu_image_package_start_rsp(dfu_ctrl_env_t *env, uint16_t result, ui
     LOG_I("dfu_image_package_start_rsp %d, %d", result, completed_count);
     dfu_image_package_start_rsp_t *rsp = DFU_PROTOCOL_PKT_BUFF_ALLOC(DFU_IMAGE_PACKAGE_START_RSP, dfu_image_package_start_rsp_t);
     rsp->result = result;
+    if (env->remote_version == 0)
+    {
+        env->rsp_frequency = 1;
+    }
+    else
+    {
+        env->rsp_frequency = DFU_DOWNLOAD_FREQUENCY;
+    }
+
+    rsp->response_frequency = env->rsp_frequency;
     rsp->reserved = 0;
     rsp->completed_count = completed_count;
     dfu_protocol_packet_send((uint8_t *)rsp);
@@ -288,23 +300,65 @@ static void dfu_image_package_start_handler(dfu_ctrl_env_t *env, uint8_t *data, 
     LOG_I("dfu_image_package_start_handler");
 
     uint16_t status = DFU_ERR_NO_ERR;
+    uint8_t erase_directly = 0;
 
     uint8_t *aligned_data = malloc(len);
     memcpy(aligned_data, data, len);
 
-    dfu_image_package_start_req_t *req = (dfu_image_package_start_req_t *)aligned_data;
+    uint32_t file_len;
+    uint32_t packet_count;
+    uint32_t crc_value;
+    env->remote_version = 0;
+
+    //LOG_I("dfu_image_package_start_handler LEN %d", len);
+    if (len == sizeof(dfu_image_package_start_req_t))
+    {
+        LOG_I("old version");
+        dfu_image_package_start_req_t *req = (dfu_image_package_start_req_t *)aligned_data;
+        file_len = req->file_len;
+        packet_count = req->packet_count;
+        crc_value = req->crc_value;
+    }
+    else
+    {
+        dfu_image_package_start_req_new_t *req_new = (dfu_image_package_start_req_new_t *)aligned_data;
+        LOG_I("remote version %d", req_new->version);
+        env->remote_version = req_new->version;
+        file_len = req_new->file_len;
+        packet_count = req_new->packet_count;
+        crc_value = req_new->crc_value;
+    }
+
+
 
     if (env->dfu_flash_thread == NULL)
     {
         LOG_I("use dfu thread");
+
+        if (g_dfu_ctrl_sem)
+        {
+            os_sem_delete(g_dfu_ctrl_sem);
+            g_dfu_ctrl_sem = NULL;
+        }
+#ifdef OS_ADAPTOR_V2
+        g_dfu_ctrl_sem = os_sem_create("dfu_ctrl_sem", 0);
+#else
+        os_sem_create(g_dfu_ctrl_sem, 0);
+#endif
         env->dfu_flash_thread = ble_dfu_package_flash_thread_start();
+
+        if (g_dfu_ctrl_sem)
+        {
+            os_sem_take(g_dfu_ctrl_sem, RT_WAITING_FOREVER);
+            LOG_I("sem taken");
+        }
     }
 
     uint32_t completed_count = 0;
     // check resume
-    if (req->file_len == env->prog.all_length &&
-            req->packet_count == env->prog.all_count &&
-            req->crc_value == env->prog.crc)
+    if (file_len == env->prog.all_length &&
+            packet_count == env->prog.all_count &&
+            crc_value == env->prog.crc)
     {
         LOG_I("resume at %d", env->prog.current_count);
         completed_count = env->prog.current_count;
@@ -314,7 +368,7 @@ static void dfu_image_package_start_handler(dfu_ctrl_env_t *env, uint8_t *data, 
     {
         if (completed_count == 0)
         {
-            uint32_t size = req->file_len;
+            uint32_t size = file_len;
             uint32_t align_size;
 
             int8_t flash_type = dfu_get_flash_type(DFU_DOWNLOAD_REGION_START_ADDR);
@@ -350,10 +404,10 @@ static void dfu_image_package_start_handler(dfu_ctrl_env_t *env, uint8_t *data, 
                 break;
             }
 
-            env->prog.all_length = req->file_len;
-            env->prog.all_count = req->packet_count;
+            env->prog.all_length = file_len;
+            env->prog.all_count = packet_count;
             env->prog.current_count = 0;
-            env->prog.crc = req->crc_value;
+            env->prog.crc = crc_value;
 
             if (env->mb_handle)
             {
@@ -371,6 +425,7 @@ static void dfu_image_package_start_handler(dfu_ctrl_env_t *env, uint8_t *data, 
             }
             else
             {
+                erase_directly = 1;
                 int ret = dfu_flash_erase(DFU_DOWNLOAD_REGION_START_ADDR, size);
                 if (ret != 0)
                 {
@@ -387,7 +442,7 @@ static void dfu_image_package_start_handler(dfu_ctrl_env_t *env, uint8_t *data, 
     }
     free(aligned_data);
 
-    if (completed_count != 0 || (completed_count == 0 && !env->mb_handle) || status != DFU_ERR_NO_ERR)
+    if (completed_count != 0 || (completed_count == 0 && erase_directly == 1) || status != DFU_ERR_NO_ERR)
     {
         dfu_image_package_start_rsp(env, status, completed_count);
     }
@@ -399,6 +454,14 @@ static void dfu_package_image_packet_rsp(dfu_ctrl_env_t *env, uint16_t result, u
     {
         LOG_I("dfu_package_image_packet_rsp %d, %d, %d", result, retrans, completed_count);
     }
+    else
+    {
+        if (completed_count % env->rsp_frequency != 0 && completed_count != env->prog.all_count)
+        {
+            return;
+        }
+    }
+
     dfu_image_package_packet_rsp_t *rsp = DFU_PROTOCOL_PKT_BUFF_ALLOC(DFU_IMAGE_PACKAGE_PACKET_RSP, dfu_image_package_packet_rsp_t);
     rsp->result = result;
     rsp->retransmission = retrans;
@@ -464,6 +527,7 @@ static void dfu_package_image_packet_handler(dfu_ctrl_env_t *env, uint8_t *data,
             rt_memcpy(fwrite->data, packet->data, packet->data_len);
 
             rt_err_t mb_ret = rt_mb_send(env->mb_handle, (rt_uint32_t)fwrite);
+            env->prog.current_count++;
             while (mb_ret != RT_EOK)
             {
                 LOG_I("MB RET %d", mb_ret);
@@ -783,12 +847,94 @@ uint8_t dfu_package_install_set()
     return ret;
 }
 
+static void clear_interrupt_setting(void)
+{
+    uint32_t i;
+    for (i = 0; i < 16; i++)
+    {
+        NVIC->ICER[i] = 0xFFFFFFFF;
+        __DSB();
+        __ISB();
+    }
+}
+
+void dfu_bootjump(void)
+{
+    uint32_t target_addr;
+    uint32_t target_size;
+#ifdef DFU_OTA_MANAGER
+    target_addr = HCPU_FLASH_CODE_START_ADDR;
+    target_size = HCPU_FLASH_CODE_SIZE;
+#else
+    target_addr = DFU_FLASH_CODE_START_ADDR;
+    target_size = DFU_FLASH_CODE_SIZE;
+#endif
+
+#ifdef RT_USING_WDT
+    // TODO: Deinit watch log should be implmented in user bin
+    extern void rt_hw_watchdog_deinit(void);
+    rt_hw_watchdog_deinit();
+#endif // RT_USING_WDT
+
+    uint32_t i;
+    dfu_ctrl_env_t *env = dfu_ctrl_get_env();
+
+    register rt_base_t ret;
+    ret = rt_hw_interrupt_disable();
+    clear_interrupt_setting();
+    rt_hw_interrupt_enable(ret);
+
+#ifdef DFU_OTA_MANAGER
+    dfu_bootjump_sec_config(env, (uint8_t *)HCPU_FLASH_CODE_START_ADDR);
+#endif
+
+    for (i = 0; i < 8; i++)
+        NVIC->ICER[0] = 0xFFFFFFFF;
+    for (i = 0; i < 8; i++)
+        NVIC->ICPR[0] = 0xFFFFFFFF;
+    SysTick->CTRL = 0;
+    SCB->ICSR |= SCB_ICSR_PENDNMICLR_Msk;
+    SCB->SHCSR &= ~(SCB_SHCSR_USGFAULTACT_Msk | SCB_SHCSR_BUSFAULTACT_Msk | SCB_SHCSR_MEMFAULTACT_Msk);
+
+    if (CONTROL_SPSEL_Msk & __get_CONTROL())
+    {
+        __set_MSP(__get_PSP());
+        __set_CONTROL(__get_CONTROL() & ~CONTROL_SPSEL_Msk);
+    }
+
+    SCB->VTOR = (uint32_t)target_addr;
+#ifdef PSRAM_XIP
+    memcpy((void *)PSRAM_BASE, (void *)target_addr, target_size);
+    run_img((uint8_t *)PSRAM_BASE);
+#else
+    run_img((uint8_t *)target_addr);
+#endif
+
+}
+
+static void dfu_ctrl_boot_to_user_fw(void)
+{
+    if (CONTROL_nPRIV_Msk & __get_CONTROL())
+    {
+        __asm("SVC #0");
+    }
+    else
+    {
+        dfu_bootjump();
+    }
+}
+
+
 static void ble_dfu_install_process()
 {
     dfu_package_install_set();
 
+#ifdef SF32LB55X
+    dfu_bootjump();
+#else
     dfu_set_reboot_after_disconnect();
     dfu_protocol_session_close();
+#endif
 }
 
 static void ble_dfu_start_install_thread()
@@ -911,6 +1057,11 @@ static void ble_dfu_package_flash()
     dfu_ctrl_env_t *env = dfu_ctrl_get_env();
     env->mb_handle = rt_mb_create("dfu_flash", 12, RT_IPC_FLAG_FIFO);
 
+    if (g_dfu_ctrl_sem)
+    {
+        os_sem_release(g_dfu_ctrl_sem);
+    }
+
     while (thread_run)
     {
         flash_write_package_t *fwrite;
@@ -934,8 +1085,7 @@ static void ble_dfu_package_flash()
                     LOG_I("ble_dfu_flash_write %d", ret);
                     OS_ASSERT(0);
                 }
-                env->prog.current_count++;
-                dfu_package_image_packet_rsp(env, 0, 0, 0);
+                dfu_package_image_packet_rsp(env, 0, 0, env->prog.current_count);
                 break;
             case DFU_FLASH_MSG_TYPE_EXIT:
                 LOG_I("DFU_FLASH_MSG_TYPE_EXIT");

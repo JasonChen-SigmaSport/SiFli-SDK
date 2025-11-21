@@ -445,8 +445,20 @@ typedef struct
 
 typedef struct
 {
+    uint32_t file_len;
+    uint32_t packet_count;
+    uint32_t crc_value;
+    uint8_t version;
+    uint8_t reserved1;
+    uint16_t reserved2;
+} dfu_image_package_start_req_new_t;
+
+
+typedef struct
+{
     uint16_t result;
-    uint16_t reserved;
+    uint8_t response_frequency;
+    uint8_t reserved;
     uint32_t completed_count;
 } dfu_image_package_start_rsp_t;
 

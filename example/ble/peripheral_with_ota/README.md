@@ -55,7 +55,13 @@ DFU_DOWNLOAD_REGION是存放下载文件的空间，需要预留一次升级所�
 6. psram1_cbus添加DFU区域，tags填写为DFU_PSRAM_CODE
 ![ptab](./assets/ptab_525_2.png)
 ### Boot loader
-检查对应使用的boot loader的main.c有无以下选择running_imgs[CORE_HCPU]的逻辑，没有需要手动添加
+boot loader关于关于DFU跳转的修改，已经集成到了如下工程：\
+example/boot_loader/project/butterflmicro\
+example/boot_loader/project/sf32lb56x_v2\
+example/boot_loader/project/sf32lb58x_v2\
+如果有修改的需求，可以参照以上工程修改以下内容：
+
+增加选择running_imgs[CORE_LCPU]的逻辑，使用LCPU
 ![boot1](./assets/bootloader1.png)
  
 
@@ -64,6 +70,8 @@ DFU_DOWNLOAD_REGION是存放下载文件的空间，需要预留一次升级所�
 
 
 ### 主工程
+本example下的相关配置已配置好，无需修改\
+如果是其他工程想要使用本DFU功能，参照如下修改：\
 Kconfig.proj
 增加DFU开关
 ![main1](./assets/mainproject1.png)
@@ -110,6 +118,18 @@ Bin名字后面的第二个参数表示image id，hcpu是0，dfu 是6。
 如果需要升级HCPU和DFU以外的bin，需要自行指定image id对应的flash地址，在dfu_flash.c的dfu_get_download_addr_by_id中，添加新的ID，然后返回ptab.c中定义的地址即可，flag&DFU_FLAG_COMPRESS条件下的地址不需要实现。
 ![package](./assets/package.png)
  
+## 手机APP和DEMO工程获取使用
+### Android sifli ble app下载地址
+https://www.pgyer.com/gurSBc
+
+### Android demo工程
+https://github.com/OpenSiFli/SiFli_OTA_APP\
+对应的部分在"3. SiFli-SDK OTA"
+
+### iOS demo工程
+https://github.com/OpenSiFli/SiFli_OTA_APP_IOS\
+对应的部分在"SiFli-SDK OTA (Nor Offline)"
+
 ## 手机使用
 操作如下图示意，搜索板子的BLE广播，点击对应设备，然后选择nor dfu，最后选择offline，不需要再点击下方的start等按钮
 ![app1](./assets/app.jpg)![app2](./assets/app2.jpg)
@@ -140,3 +160,5 @@ board.conf中打开的内容，dfu工程也会编译，导致dfu工程编译一�
 |0.0.2 |03/2025 |增加关于nand芯片DFU的支持，更新制作命令和脚本，去掉无效参数|
 |0.0.3 |03/2025 |增加对58x的支持 |
 |0.0.4 |04/2025 |增加http下载示例，调整目录结构和宏开关 |
+|0.0.5 |11/2025 |增加55x的升级适配 |
+|0.0.6 |11/2025 |更新一些过时内容 |
