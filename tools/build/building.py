@@ -770,19 +770,19 @@ def AddChildProj(proj_name, proj_path, img_embedded=False, shared_option=None, c
     child_builder = None
     if os.path.isfile(os.path.join(proj_path, 'SConstruct.py')):
         child_builder = (lambda spec: (spec.loader.exec_module(mod := importlib.util.module_from_spec(spec)) or mod))(importlib.util.spec_from_file_location(proj_name, os.path.join(proj_path, 'SConstruct.py')))
-        proj_env = child_builder.create_env(proj_path)
+        child_builder.create_env(proj_path)
         
     else:
         SifliEnv(proj_path)
 
-        proj_env = Environment(tools = ['mingw'],
-            AS = rtconfig.AS, ASFLAGS = rtconfig.AFLAGS,
-            CC = rtconfig.CC, CFLAGS = rtconfig.CFLAGS,
-            CXX = rtconfig.CXX, CXXFLAGS = rtconfig.CXXFLAGS,
-            AR = rtconfig.AR, ARFLAGS = '-rc', LIBPATH=['.'],
-            LINK = rtconfig.LINK, LINKFLAGS = rtconfig.LFLAGS)
+    proj_env = Environment(tools = ['mingw'],
+        AS = rtconfig.AS, ASFLAGS = rtconfig.AFLAGS,
+        CC = rtconfig.CC, CFLAGS = rtconfig.CFLAGS,
+        CXX = rtconfig.CXX, CXXFLAGS = rtconfig.CXXFLAGS,
+        AR = rtconfig.AR, ARFLAGS = '-rc', LIBPATH=['.'],
+        LINK = rtconfig.LINK, LINKFLAGS = rtconfig.LFLAGS)
             
-        proj_env.PrependENVPath('PATH', rtconfig.EXEC_PATH)
+    proj_env.PrependENVPath('PATH', rtconfig.EXEC_PATH)
         
     proj_env['build_dir'] = proj_rtconfig.OUTPUT_DIR
     proj_env['BSP_ROOT'] = os.path.abspath(proj_path)
