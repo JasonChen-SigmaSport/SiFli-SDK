@@ -736,7 +736,7 @@ def AddChildProj(proj_name, proj_path, img_embedded=False, shared_option=None, c
     full_proj_name = '.'.join([ParentProjStack[-1]['name'], proj_name])
         
     # output to parent build dir
-    proj_rtconfig.OUTPUT_DIR = os.path.join(parent_output_dir, proj_name)
+    proj_rtconfig.OUTPUT_DIR = os.path.join(parent_output_dir, proj_name).replace('\\', '/')
     if board:
         # as env is not created before SifliEnv, save CORE in rtconfig.py for board selection
         proj_rtconfig.CORE = 'HCPU'
