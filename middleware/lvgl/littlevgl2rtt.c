@@ -470,7 +470,9 @@ rt_err_t littlevgl2rtt_init(const char *name)
 
     lv_hal_init(name);
 #ifdef LV_USE_LVSF
+    #ifndef LV_USE_THEME_DEFALUT
     lv_theme_1_init();
+    #endif /* LV_USE_THEME_DEFALUT */
 #endif /* LV_USE_LVSF */
 #if 0
 #ifdef LCD_SDL2
