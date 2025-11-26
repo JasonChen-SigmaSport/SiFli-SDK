@@ -580,25 +580,19 @@ __HAL_ROM_USED void HAL_GPIO_EXTI_IRQHandler(GPIO_TypeDef *hgpio, uint16_t GPIO_
          * AON pin detection always works even if it's not in sleep state.
          * So if edge detection is configured, the corresponding bit in WSR would still be set to 1 if system is awake, and no one will clear the bit.
          */
-        if ((GPIO_TypeDef *)hwp_gpio1 == hgpio)
+#ifdef SOC_BF0_HCPU
+        wakeup_pin = HAL_HPAON_QueryWakeupPin(hgpio, GPIO_Pin);
+        if (wakeup_pin >= 0)
         {
-            wakeup_pin = HAL_HPAON_QueryWakeupPin(hgpio, GPIO_Pin);
-            if (wakeup_pin >= 0)
-            {
-                HAL_HPAON_CLEAR_WSR(1UL << (HPSYS_AON_WCR_PIN0_Pos + wakeup_pin));
-            }
+            HAL_HPAON_CLEAR_WSR(1UL << (HPSYS_AON_WCR_PIN0_Pos + wakeup_pin));
         }
-
-        if ((GPIO_TypeDef *)hwp_gpio2 == hgpio)
+#else
+        wakeup_pin = HAL_LPAON_QueryWakeupPin(hgpio, GPIO_Pin);
+        if (wakeup_pin >= 0)
         {
-            wakeup_pin = HAL_LPAON_QueryWakeupPin(hgpio, GPIO_Pin);
-            if (wakeup_pin >= 0)
-            {
-                HAL_LPAON_CLEAR_WSR(1UL << (LPSYS_AON_WCR_PIN0_Pos + wakeup_pin));
-
-                HAL_PMU_CLEAR_WSR(1UL << (PMUC_WCR_PIN0_Pos + wakeup_pin));
-            }
+            HAL_LPAON_CLEAR_WSR(1UL << (LPSYS_AON_WCR_PIN0_Pos + wakeup_pin));
         }
+#endif /* SOC_BF0_HCPU */
     }
 }
 

@@ -627,6 +627,13 @@ static rt_err_t sifli_pin_irq_enable(struct rt_device *device, rt_base_t pin,
             }
             else // PB
             {
+#ifdef SOC_BF0_HCPU
+                /*
+                    GPIO1 IRQ also handle GPIO2 wakeup pin
+                    through `drv_pin_irq_from_wsr()`->`GPIO1_IRQHandler` on HPSYS
+                */
+                GPIO_ENABLE_GPIO1_IRQ();
+#endif // SOC_BF0_HCPU
                 GPIO_ENABLE_GPIO2_IRQ();
             }
             pin_irq_hdr_tab[i].en = 1;
@@ -758,6 +765,9 @@ void drv_pin_irq_from_wsr(uint32_t wsr_pins)
     rt_hw_interrupt_enable(level);
 }
 
+/*
+    Wakeup pin(Including GPIO1,GPIO2,PBR pins) IRQ handler
+*/
 void check_wsr_pin(void)
 {
     uint32_t status;
