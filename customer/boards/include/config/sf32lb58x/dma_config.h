@@ -132,6 +132,11 @@ extern "C" {
 #define UART1_RX_DMA_INSTANCE            DMA1_Channel6
 #define UART1_RX_DMA_IRQ                 DMAC1_CH6_IRQn
 
+#define UART2_DMA_TX_IRQHandler          DMAC1_CH6_IRQHandler
+#define UART2_TX_DMA_IRQ_PRIO            0
+#define UART2_TX_DMA_INSTANCE            DMA1_Channel6
+#define UART2_TX_DMA_IRQ                 DMAC1_CH6_IRQn
+
 /* DMA1 channel7  */
 #define UART3_DMA_TX_IRQHandler         DMAC1_CH7_IRQHandler
 #define UART3_TX_DMA_IRQ_PRIO           0
