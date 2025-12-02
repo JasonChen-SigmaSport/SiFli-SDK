@@ -1,4 +1,5 @@
 menuconfig BSP_USING_CHARGER
+    depends on RT_USING_PIN
     bool "Charger"
     default n
     if BSP_USING_CHARGER  
