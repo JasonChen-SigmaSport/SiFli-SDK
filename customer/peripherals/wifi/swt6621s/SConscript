@@ -6,19 +6,15 @@ src = Glob('*.c')
 path = [cwd]
 
 CPPPATH = path
-lib = [GroupLibName('swt6621sl_lib')]
+lib = [GroupLibName('swt6621sl')]
 libpath = [cwd + '/swt6621sl_lib']
 
 group = DefineGroup(
-    'Drivers',
+    'lib',
     src,
     depend=['RT_USING_WIFI', 'RT_USING_LWIP', 'PKG_USING_WPA_SUPPLICANT','BSP_WIFI_SWT6621'],
     LIBS=lib,
     LIBPATH=libpath,
     CPPPATH=CPPPATH
 )
-
-#if GetDepend('BSP_WIFI_SWT6621'):
-#    group = group + SConscript('swt6621sl_lib/SConscript')
-
 Return('group')
