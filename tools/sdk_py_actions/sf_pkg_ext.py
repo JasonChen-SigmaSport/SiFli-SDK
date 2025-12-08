@@ -152,11 +152,19 @@ def remove_credentials() -> None:
     except Exception as e:
         print(f"Error removing credentials file: {e}")
 
+def get_saved_user() -> Optional[str]:
+    """Return the stored username, if any, from local credentials"""
+    credentials = load_credentials()
+    if not credentials:
+        return None
+
+    return next(iter(credentials.keys()))
+
 def action_extensions(base_actions: Dict, project_path: str) -> Any:
 
-    def add_dep_callback(target_name: str, ctx: Context, args: PropertyDict) -> None:
+    def init_callback(target_name: str, ctx: Context, args: PropertyDict) -> None:
         try:
-            result = subprocess.run(["conan", "new", "sf-pkg-dep"], check=False)
+            result = subprocess.run(["conan", "new", "sf-pkg-project"], check=False)
             if result.returncode == 0:
                 print("You can now add dependent packages in conanfile.txt")
             else:
@@ -170,6 +178,8 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
                 "conan", "install", ".", 
                 "--output-folder=sf-pkgs", 
                 "--deployer=full_deploy", 
+                "--envs-generation=false",
+                "--env-generation=false",
                 "-r=artifactory"
             ], check=True)
             print("Packages installed successfully")
@@ -178,12 +188,38 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
         except Exception as e:
             print(f"Error: {e}")
     
-    def new_callback(target_name: str, ctx: Context, args: PropertyDict, name: str = "mypackage") -> None:
+    def new_callback(
+        target_name: str,
+        ctx: Context,
+        args: PropertyDict,
+        name: str = "mypackage",
+        version: Optional[str] = None,
+        license: Optional[str] = None,
+        author: Optional[str] = None,
+        support_sdk_version: Optional[str] = None,
+    ) -> None:
         try:
-            subprocess.run([
-                "conan", "new", "sf-pkg", 
-                "-d", f"name={name}"
-            ], check=True)
+            user = get_saved_user()
+            if not user:
+                print("Error: No stored credentials found. Please login using `sdk.py sf-pkg-login` first.")
+                return
+
+            cmd = [
+                "conan", "new", "sf-pkg-package",
+                "-d", f"name={name}",
+                "-d", f"user={user}",
+            ]
+
+            if version:
+                cmd.extend(["-d", f"version={version}"])
+            if license:
+                cmd.extend(["-d", f"license={license}"])
+            if author:
+                cmd.extend(["-d", f"author={author}"])
+            if support_sdk_version:
+                cmd.extend(["-d", f"support_sdk_version={support_sdk_version}"])
+
+            subprocess.run(cmd, check=True)
             print(f"Created new package: {name}")
         except subprocess.CalledProcessError as e:
             print(f"Error creating new package: {e}")
@@ -372,9 +408,9 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
                     },
                 ],
             },
-            'sf-pkg-add-dep': {
-                'callback': add_dep_callback,
-                'help': 'Add initial package dependency file.',
+            'sf-pkg-init': {
+                'callback': init_callback,
+                'help': 'Initialize project dependencies.',
             },
             'sf-pkg-install': {
                 'callback': install_callback,
@@ -389,6 +425,30 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
                         'help': 'Package name.',
                         'default': 'mypackage',
                         'required': True,
+                    },
+                    {
+                        'names': ['--version'],
+                        'help': 'Package version.',
+                        'required': False,
+                        'default': None,
+                    },
+                    {
+                        'names': ['--license'],
+                        'help': 'Package license.',
+                        'required': False,
+                        'default': None,
+                    },
+                    {
+                        'names': ['--author'],
+                        'help': 'Package author.',
+                        'required': False,
+                        'default': None,
+                    },
+                    {
+                        'names': ['--support-sdk-version'],
+                        'help': 'Supported SiFli-SDK version.',
+                        'required': False,
+                        'default': None,
                     },
                 ],
             },
@@ -434,10 +494,9 @@ def action_extensions(base_actions: Dict, project_path: str) -> Any:
             'sf-pkg-search':{
                 'callback': search_callback,
                 'help': 'Search for packages in SiFli package registry.',
-                'options': [
+                'arguments': [
                     {
-                        'names': ['--name', '-n'],
-                        'help': 'Name of package to search for.',
+                        'names': ['name'],
                         'required': True,
                     }
                 ],
