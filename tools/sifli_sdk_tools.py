@@ -3240,6 +3240,8 @@ def main(argv: List[str]) -> None:
 
     g.sifli_sdk_tools_path = os.environ.get('SIFLI_SDK_TOOLS_PATH') or os.path.expanduser(SIFLI_SDK_TOOLS_PATH_DEFAULT)
 
+    os.environ['CONAN_HOME'] = os.path.join(g.sifli_sdk_tools_path, 'conan')
+
     # On macOS, unset __PYVENV_LAUNCHER__ variable if it is set.
     # Otherwise sys.executable keeps pointing to the system Python, even when a python binary from a virtualenv is invoked.
     # See https://bugs.python.org/issue22490#msg283859.

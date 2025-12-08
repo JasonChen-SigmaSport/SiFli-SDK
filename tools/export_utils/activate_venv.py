@@ -90,6 +90,7 @@ def get_sifli_sdk_env() -> Dict[str,str]:
         'SIFLI_SDK_PATH': os.environ['SIFLI_SDK_PATH'],
         'SIFLI_SDK_VERSION': os.environ['SIFLI_SDK_VERSION'],
         'SIFLI_SDK_PYTHON_ENV_PATH': os.environ['SIFLI_SDK_PYTHON_ENV_PATH'],
+        'CONAN_HOME': os.path.join(sifli_sdk_tools_path, 'conan'),
         # TODO: 2.x env, remove at 3.x
         'SIFLI_SDK': f"{os.environ['SIFLI_SDK_PATH']}/",
         'RTT_CC': 'gcc',
