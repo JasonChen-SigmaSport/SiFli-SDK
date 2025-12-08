@@ -122,7 +122,7 @@ struct Raster
 
 /* function declarations */
 /* generic utility functions */
-static void *reallocarray(void *optr, size_t nmemb, size_t size);
+void *reallocarray(void *optr, size_t nmemb, size_t size);
 static inline int fast_floor(float x);
 static inline int fast_ceil(float x);
 /* file loading */
@@ -444,7 +444,7 @@ exit_error:
 /* OpenBSD's reallocarray() standard libary function.
  * A wrapper for realloc() that takes two size args like calloc().
  * Useful because it eliminates common integer overflow bugs. */
-static void *
+void *
 reallocarray(void *optr, size_t nmemb, size_t size)
 {
     if ((nmemb >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&

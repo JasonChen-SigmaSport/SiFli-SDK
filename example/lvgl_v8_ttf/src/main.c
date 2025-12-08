@@ -71,7 +71,8 @@ void lv_show_label(SFT *sftfont, char *text, uint32_t v_off, uint8_t font_size)
 {
 
     lv_obj_t *canvas;
-    int i = 0, x_off = 20;
+    uint32_t  i = 0;
+    int x_off = 20;
 
 
     int size = LV_IMG_BUF_SIZE_TRUE_COLOR(LV_HOR_RES, font_size * 2);
