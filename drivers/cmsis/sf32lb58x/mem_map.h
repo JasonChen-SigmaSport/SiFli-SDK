@@ -91,7 +91,7 @@
 #define LPSYS_ROM_SIZE      (768*1024)
 #define LPSYS_ITCM_SIZE     (16*1024)
 #define LPSYS_DTCM_SIZE     (16*1024)
-#define LPSYS_RAM_SIZE      (800*1024)
+#define LPSYS_RAM_SIZE      (896*1024)
 #define LPSYS_EM_SIZE       (39*1024)
 #define LCPU_HCPU_AUDIO_MEM_SIZE         (1 * 1024)
 
