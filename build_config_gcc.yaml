@@ -109,6 +109,20 @@ after_55x_boards: &after_55x_boards
   - sf32lb52-lcd_n16r8 
   - sf32lb52-nano_a128r16
   - sf32lb52-nano_n16r16
+  - sf32lb56-lcd_a128r12n1
+  - sf32lb56-lcd_n16r12n1
+  - sf32lb58-lcd_a128r32n1_qspi
+  - sf32lb58-lcd_n16r32n1_qspi  
+
+
+devkit_lcd_boards: &devkit_lcd_boards
+  - sf32lb52-lcd_n16r8 
+  - sf32lb52-nano_a128r16
+  - sf32lb52-nano_n16r16
+  - sf32lb56-lcd_a128r12n1
+  - sf32lb56-lcd_n16r12n1
+  - sf32lb58-lcd_a128r32n1_qspi
+  - sf32lb58-lcd_n16r32n1_qspi  
 
 
 common_projects:
@@ -192,55 +206,55 @@ common_projects:
     boards: *525_devkit_lcd_boards
 
   - path: example/hal/aes/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/crc/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/ezip/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/gpio/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/hash/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
   
   - path: example/hal/hwtimer/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
   
   - path: example/hal/i2c/eeprom/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/pwm/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/rng/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/rtc/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/spi/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/tsen/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/uart/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/wdt/iwdt/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal/wdt/wdt1/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/hal_example/project
     boards: *default_boards
 
   - path: example/misc/button/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/multicore/rpmsg-lite/project/hcpu
     boards: *multicore_boards
@@ -373,16 +387,16 @@ common_projects:
     boards: *after_55x_boards
 
   - path: example/rt_device/gpio/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/i2c/eeprom/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/i2s/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/pdm/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/pm/project/hcpu
     boards:
@@ -393,34 +407,34 @@ common_projects:
       - sf32lb58-lcd_n16r64n4
 
   - path: example/rt_device/pwm/pwm/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/pwm/pwm_dma/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/rgb_led/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/rtc/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/spi/card/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/spi_tf/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/uart/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/usb/usb_mstorage/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/usb/usb_vcom/project
-    boards: *525_devkit_lcd_boards
+    boards: *devkit_lcd_boards
 
   - path: example/rt_device/wdt/project
-    boards: *525_devkit_lcd_boards    
+    boards: *devkit_lcd_boards    
 
   - path: example/rt_driver/project
     boards: *default_boards
