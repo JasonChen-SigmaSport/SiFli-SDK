@@ -22,7 +22,7 @@
 例程开机会默认使能蓝牙，并通过FINSH命令进行控制
 1. 播放本地音乐：
 通过命令music play_default来播放预置的.mp3文件，如果没有连接耳机等蓝牙设备，会直接从喇叭播出。
-如果想播放文件系统内的歌曲可以使用music play [loop_time] [path]来进行，例music play 3 \A.mp3会播放root分区下A.mp3 3次
+如果想播放文件系统内的歌曲可以使用music play [loop_time] [path]来进行，例music play 3 \A.mp3会播放root分区下A.mp3 4次 (loop_time+1)
 
 2. 搜索蓝牙设备
 通过命令music inquiry start来搜索耳机类蓝牙设备，该命令只会上报搜到的COD的Major Class为0x000400的设备(Audio device)。
