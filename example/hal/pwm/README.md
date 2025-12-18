@@ -2,9 +2,10 @@
 源码路径：example/hal/pwm
 ## 支持的平台
 例程可以运行在以下开发板.
-* sf32lb52-nano系列
-* sf32lb52-lcd_n16r8
-* sf32lb58-lcd_n16r64n4
+* sf32lb52-nano
+* sf32lb52-lcd
+* sf32lb56-lcd
+* sf32lb58-lcd
 ## 概述
 * 包含了GPtimer通过IO口输出PWM的示例
 * 包含了采用Atimer通过IO输出互补PWM的示例
@@ -45,15 +46,18 @@ msh />
 物理位置指管脚在板子上实际引出的排针位置
 |版型名称  | PWM       | CHX     |   引脚(物理位置)  |
 |--------|------------|--------|---------|
-|sf32lb52-nano_n16r16    | GPTIM2     | CH1    |    PA09 （在板子背面需要手动引出）|
-|sf32lb52-lcd_n16r8  | GPTIM2     | CH1    |    PA09 （37）     |
-|sf32lb58-lcd_n16r64n4  | GPTIM1     | CH2  |      PA51    （CONN2 28）    |
+|sf32lb52-nano    | GPTIM2     | CH1    |    PA09 （在板子背面需要手动引出）|
+|sf32lb52-lcd   | GPTIM2     | CH1    |    PA09 （37）     |
+|sf32lb56-lcd    | GPTIM2     | CH1    |    PA36 （40）     |
+|sf32lb58-lcd  | GPTIM1     | CH2  |      PA51    （CONN2 28）    |
 ```c
     #define PAD_PA_09 PAD_PA09 /* 52系列默认PA09输出(物理位置37) */
     HAL_PIN_Set(PAD_PA_09, cfg->pad_func, PIN_PULLUP, 1);/*PA09配置为GPTIM2_CH1功能*/
 
+    #define PAD_PA_36 PAD_PA36 /* 56系列默认P36输出(物理位置40) */
+    HAL_PIN_Set(PAD_PA_36, cfg->pad_func, PIN_PULLUP, 1);/*PA36配置为GPTIM2_CH1功能*/
 
-    #define PAD_PA_51 PAD_PA51/* 587系列默认PA51输出(物理位置CONN2 28) */
+    #define PAD_PA_51 PAD_PA51/* 58系列默认PA51输出(物理位置CONN2 28) */
     HAL_PIN_Set(PAD_PA_51, cfg->pad_func, PIN_PULLUP, 1);/*PA51配置为GPTIM1_CH2功能*/
 ```
 **注意**: 
@@ -62,17 +66,23 @@ msh />
 * PWM周期period,脉宽pulse修改
 
 ```c
-#if defined(BSP_USING_BOARD_EM_LB525XXX)
-    T_haltest_pwm_cfg testcfg[] =
+#if defined(SF32LB52X)
+
+T_haltest_pwm_cfg testcfg[] =
 {
     {hwp_gptim2, CORE_ID_HCPU, GPTIM2_CH1, GPT_CHANNEL_1, 5000000, 1000000, 0},
 };  //period:0.5s  pulse:0.25s
-#elif defined BSP_USING_BOARD_EM_LB587XXX
-    T_haltest_pwm_cfg testcfg[] =
+#elif defined (SF32LB56X)
+T_haltest_pwm_cfg testcfg[] =
+{
+    {hwp_gptim2, CORE_ID_HCPU, GPTIM2_CH1, GPT_CHANNEL_1, 5000000, 1000000, 0},
+};  //period:0.5s  pulse:0.25s
+#elif defined (SF32LB58X)
+T_haltest_pwm_cfg testcfg[] =
 {
     {hwp_gptim1, CORE_ID_HCPU, GPTIM1_CH2, GPT_CHANNEL_2, 5000000, 1000000, 0},
 };  //period:0.5s  pulse:0.25s
-#endif
+
 ```
 1. 参数:5000000 单位为ns,对应周期为1/0.005s=200Hz
 2.  参数:1000000 单位为ns,表示一个周期内PWM输出1的脉宽,不能大于上面的参数,
@@ -107,33 +117,43 @@ atimer pwm demo end!
 物理位置指管脚对应在板子上的引脚排针位置
 |版型名称  | pwm       | 输出Channel1     | 输出Channel2   |    
 |--------|------------|---------------|-------------------|
-|sf32lb52-nano_n16r16    | ATIM1     | PAD_PA00,PAD_PA02(物理位置在板子背面需要手动飞线引出)   | PAD_PA03,PAD_PA032(物理位置在板子背面需要手动飞线引出)    |  
-|sf32lb52-lcd_n16r8    | ATIM1     | PAD_PA00（物理位置32）,PAD_PA02（物理位置36）   | PAD_PA03（物理位置40）,PAD_PA03（物理位置38）    |   
-|sf32lb58-lcd_n16r64n4  | ATIM2     | PAD_PA84（conn2 21）,PAD_PA86（conn2 24） |PAD_PA90（conn2 27）,PAD_PA91（conn2 26）  |
+|sf32lb52-nano    | ATIM1     | PAD_PA00,PAD_PA02(物理位置在板子背面需要手动飞线引出)   | PAD_PA03,PAD_PA032(物理位置在板子背面需要手动飞线引出)    |  
+|sf32lb52-lcd    | ATIM1     | PAD_PA00（物理位置32）,PAD_PA02（物理位置36）   | PAD_PA03（物理位置40）,PAD_PA03（物理位置38）    | 
+|sf32lb56-lcd    | ATIM1     | PAD_PA24,PAD_PA25（PA24对应模组55，PA25对应模组51，需要从模组飞线）   | PAD_PA29,PAD_PA30（PA29对应模组23，PA25对应模组49，需要从模组飞线 ）    |
+|sf32lb58-lcd  | ATIM2     | PAD_PA84（conn2 21）,PAD_PA86（conn2 24） |PAD_PA90（conn2 27）,PAD_PA91（conn2 26）  |
 * 52系列：PA00,PA02输出Channel1互补PWM波形,PA03,PA04输出Channel2互补PWM波形:
+* 52系列：PA23,PA24输出Channel1互补PWM波形,PA29,PA30输出Channel2互补PWM波形:
 * 587系列：PA84,PA86输出Channel1互补PWM波形,PA90,PA91输出Channel2互补PWM波形:
 ![alt text](assets/atimer_ch1_ch2_pwm-1.jpg)
-#### PWM参数修改
-* ATIM的修改：52系列选择的是ATIM1,587选择的是ATIM2
-```c
-    #if defined(BSP_USING_BOARD_EM_LB525XXX)
-    atim_Handle.Instance = (GPT_TypeDef *)hwp_atim1;
 
-    #elif defined (BSP_USING_BOARD_EM_LB587XXX)
+#### PWM参数修改
+
+* ATIM的修改：52系列选择的是ATIM1,56系列选择的是ATIM1,58系列选择的是ATIM2
+```c
+#if defined(SF32LB52X)
+    atim_Handle.Instance = (GPT_TypeDef *)hwp_atim1;
+#elif defined (SF32LB56X)
+    atim_Handle.Instance = (GPT_TypeDef *)hwp_atim1;
+#elif defined (SF32LB58X)
     atim_Handle.Instance = (GPT_TypeDef *)hwp_atim2;
-    #endif
 ```
 * IO输出修改
 除55x芯片外,可以配置到任意带有PA_TIM功能的IO输出PWM波形
 ![alt text](assets/image-1.png)
 ```c
-#if defined(BSP_USING_BOARD_EM_LB525XXX)
-	HAL_PIN_Set(PAD_PA00, ATIM1_CH1,  PIN_PULLUP, 1);
+#if defined(SF32LB52X)
+    HAL_PIN_Set(PAD_PA00, ATIM1_CH1,  PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA02, ATIM1_CH1N, PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA03, ATIM1_CH2,  PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA04, ATIM1_CH2N, PIN_PULLUP, 1);
 
-#elif defined(BSP_USING_BOARD_EM_LB587XXX)
+#elif defined(SF32LB56X)
+    HAL_PIN_Set(PAD_PA24, ATIM1_CH1,  PIN_PULLUP, 1);
+    HAL_PIN_Set(PAD_PA25, ATIM1_CH1N, PIN_PULLUP, 1);
+    HAL_PIN_Set(PAD_PA29, ATIM1_CH2,  PIN_PULLUP, 1);
+    HAL_PIN_Set(PAD_PA30, ATIM1_CH2N, PIN_PULLUP, 1);
+#elif defined(SF32LB58X)
+
     HAL_PIN_Set(PAD_PA84, ATIM2_CH1,  PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA86, ATIM2_CH1N, PIN_PULLUP, 1);
     HAL_PIN_Set(PAD_PA90, ATIM2_CH2,  PIN_PULLUP, 1);
