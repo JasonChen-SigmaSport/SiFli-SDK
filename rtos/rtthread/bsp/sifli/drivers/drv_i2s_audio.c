@@ -510,25 +510,20 @@ static rt_err_t bf0_audio_i2s_start(struct bf0_i2s_audio *aud, int stream)
 #endif
 #else    //i2s codec on evb
 #ifndef SF32LB55X
-#ifdef SF32LB58X
+#ifdef hwp_i2s3
     if (hi2s->Instance == hwp_i2s3)
     {
         HAL_RCC_EnableModule(RCC_MOD_I2S3);
     }
-    else if (hi2s->Instance == hwp_i2s2)
-    {
-        HAL_RCC_EnableModule(RCC_MOD_I2S2);
-    }
-    else
-    {
-        HAL_RCC_EnableModule(RCC_MOD_I2S1);
-    }
-#else
+#endif
+#ifdef hwp_i2s2
     if (hi2s->Instance == hwp_i2s2)
     {
         HAL_RCC_EnableModule(RCC_MOD_I2S2);
     }
-    else
+#endif
+#ifdef hwp_i2s1
+    if (hi2s->Instance == hwp_i2s1)
     {
         HAL_RCC_EnableModule(RCC_MOD_I2S1);
     }
