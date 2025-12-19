@@ -126,12 +126,10 @@
                     "DFU_FLASH_CODE"
                 ],
                 "img": "dfu",
-                "exec": "dfu",
                 "ftab": {
                     "name": "dfu",
                     "address": [
-                        "base",
-                        "xip"
+                        "base"
                     ]
                 }
             },
