@@ -98,7 +98,7 @@
 #endif  /* RT_USING_PM */
 
 #define IS_DCACHED_RAM(addr) (((uint32_t) addr) >= (PSRAM_BASE))
-#define GPU_BLEND_EXP_MS     500
+#define GPU_BLEND_EXP_MS     1000
 #define mono_layer_addr HPSYS_RAM1_BASE  //Any accessable address for mono layer, SRAM is better
 
 
